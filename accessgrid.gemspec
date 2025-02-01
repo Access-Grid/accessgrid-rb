@@ -14,6 +14,8 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.6.0'
 
+  spec.metadata      = { "source_code_uri" => "https://github.com/access-grid/accessgrid-rb" }
+
   # Specify which files should be added to the gem when it is released
   spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE', 'CHANGELOG.md']
   spec.bindir        = 'bin'
