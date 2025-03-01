@@ -6,21 +6,21 @@ module AccessGrid
     end
 
     def provision(params)
-      response = @client.make_request(:post, '/api/v1/nfc_keys/issue', params)
+      response = @client.make_request(:post, '/v1/key-cards', params)
       Card.new(response)
     end
 
     def update(params)
       card_id = params.delete(:card_id)
-      response = @client.make_request(:put, "/api/v1/nfc_keys/#{card_id}", params)
+      response = @client.make_request(:put, "/v1/key-cards/#{card_id}", params)
       Card.new(response)
     end
 
     private def manage_state(card_id, action)
       response = @client.make_request(
         :post, 
-        "/api/v1/nfc_keys/#{card_id}/manage", 
-        { manage_action: action }
+        "/v1/key-cards/#{card_id}/#{action}", 
+        {}
       )
       Card.new(response)
     end

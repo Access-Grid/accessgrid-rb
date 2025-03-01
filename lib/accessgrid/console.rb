@@ -7,25 +7,25 @@ module AccessGrid
 
     def create_template(params)
       transformed_params = transform_template_params(params)
-      response = @client.make_request(:post, '/api/v1/enterprise/templates', transformed_params)
+      response = @client.make_request(:post, '/v1/console/card-templates', transformed_params)
       Template.new(response)
     end
 
     def update_template(params)
       card_template_id = params.delete(:card_template_id)
       transformed_params = transform_template_params(params)
-      response = @client.make_request(:put, "/api/v1/enterprise/templates/#{card_template_id}", transformed_params)
+      response = @client.make_request(:put, "/v1/console/card-templates/#{card_template_id}", transformed_params)
       Template.new(response)
     end
 
     def read_template(params)
-      response = @client.make_request(:get, "/api/v1/enterprise/templates/#{params[:card_template_id]}")
+      response = @client.make_request(:get, "/v1/console/card-templates/#{params[:card_template_id]}")
       Template.new(response)
     end
 
     def event_log(params)
       card_template_id = params.delete(:card_template_id)
-      response = @client.make_request(:get, "/api/v1/enterprise/templates/#{card_template_id}/logs", params)
+      response = @client.make_request(:get, "/v1/console/card-templates/#{card_template_id}/logs", params)
       response['logs'].map { |log| Event.new(log) }
     end
 
