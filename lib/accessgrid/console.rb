@@ -11,22 +11,33 @@ module AccessGrid
       Template.new(response)
     end
 
-    def update_template(params)
-      card_template_id = params.delete(:card_template_id)
+    def update_template(template_id, params)
       transformed_params = transform_template_params(params)
-      response = @client.make_request(:put, "/v1/console/card-templates/#{card_template_id}", transformed_params)
+      response = @client.make_request(:put, "/v1/console/card-templates/#{template_id}", transformed_params)
       Template.new(response)
     end
 
-    def read_template(params)
-      response = @client.make_request(:get, "/v1/console/card-templates/#{params[:card_template_id]}")
+    def read_template(template_id)
+      response = @client.make_request(:get, "/v1/console/card-templates/#{template_id}")
       Template.new(response)
     end
 
+    def get_logs(template_id, params = {})
+      response = @client.make_request(:get, "/v1/console/card-templates/#{template_id}/logs", nil, params)
+      
+      # Return full response to match Python's behavior
+      if response['logs']
+        response['logs'] = response['logs'].map { |log| Event.new(log) }
+      end
+      
+      response
+    end
+    
+    # Keep event_log for backwards compatibility
     def event_log(params)
-      card_template_id = params.delete(:card_template_id)
-      response = @client.make_request(:get, "/v1/console/card-templates/#{card_template_id}/logs", params)
-      response['logs'].map { |log| Event.new(log) }
+      template_id = params.delete(:card_template_id)
+      response = get_logs(template_id, params)
+      response['logs'] || []
     end
 
     private
@@ -49,18 +60,23 @@ module AccessGrid
   end
 
   class Template
-    attr_reader :id, :name, :platform, :protocol, :allow_on_multiple_devices,
-                :watch_count, :iphone_count, :support_info, :style_settings
+    attr_reader :id, :name, :platform, :protocol, :use_case, :created_at, 
+                :last_published_at, :issued_keys_count, :active_keys_count,
+                :allowed_device_counts, :support_settings, :terms_settings, :style_settings
 
     def initialize(data)
       @id = data['id']
       @name = data['name']
       @platform = data['platform']
       @protocol = data['protocol']
-      @allow_on_multiple_devices = data['allowed_device_counts']['allow_on_multiple_devices']
-      @watch_count = data['allowed_device_counts']['watch']
-      @iphone_count = data['allowed_device_counts']['iphone']
-      @support_info = data['support_settings']
+      @use_case = data['use_case']
+      @created_at = data['created_at']
+      @last_published_at = data['last_published_at']
+      @issued_keys_count = data['issued_keys_count']
+      @active_keys_count = data['active_keys_count']
+      @allowed_device_counts = data['allowed_device_counts']
+      @support_settings = data['support_settings']
+      @terms_settings = data['terms_settings']
       @style_settings = data['style_settings']
     end
   end
@@ -71,7 +87,7 @@ module AccessGrid
     def initialize(data)
       @type = data['event']
       @timestamp = data['created_at']
-      @user_id = data['metadata']['user_id']
+      @user_id = data['metadata']['user_id'] if data['metadata'] && data['metadata']['user_id']
       @ip_address = data['ip_address']
       @user_agent = data['user_agent']
       @metadata = data['metadata']

@@ -37,14 +37,14 @@ client = AccessGrid.new(account_id, secret_key)
 
 ### Access Cards
 
-#### Provision a new card
+#### Issue a new card
 
 ```ruby
-card = client.access_cards.provision(
-  card_template_id: "0xd3adb00b5",
+card = client.access_cards.issue(
+  card_template_id: card_template_id,
   employee_id: "123456789",
+  card_number: "16187",
   tag_id: "DDEADB33FB00B5",
-  allow_on_multiple_devices: true,
   full_name: "Employee name",
   email: "employee@yourwebsite.com",
   phone_number: "+19547212241",
@@ -54,39 +54,71 @@ card = client.access_cards.provision(
   employee_photo: "[image_in_base64_encoded_format]"
 )
 
+# Provision is an alias for issue (for backwards compatibility)
+card = client.access_cards.provision(
+  card_template_id: card_template_id,
+  employee_id: "123456789",
+  # ...other parameters
+)
+
 puts "Install URL: #{card.url}"
+```
+
+#### Get a card
+
+```ruby
+card = client.access_cards.get(card_id: "0xc4rd1d")
+
+puts "Card ID: #{card.id}"
+puts "State: #{card.state}"
+puts "Full Name: #{card.full_name}"
+puts "Install URL: #{card.install_url}"
+puts "Expiration Date: #{card.expiration_date}"
+puts "Card Number: #{card.card_number}"
+puts "Site Code: #{card.site_code}"
+puts "Devices: #{card.devices.length}"
+puts "Metadata: #{card.metadata}"
 ```
 
 #### Update a card
 
 ```ruby
 card = client.access_cards.update(
-  card_id: "0xc4rd1d",
-  employee_id: "987654321",
-  full_name: "Updated Employee Name",
-  classification: "contractor",
-  expiration_date: "2025-02-22T21:04:03.664Z",
-  employee_photo: "[image_in_base64_encoded_format]"
+  "0xc4rd1d", 
+  {
+    employee_id: "987654321",
+    full_name: "Updated Employee Name",
+    classification: "contractor",
+    expiration_date: "2025-02-22T21:04:03.664Z",
+    employee_photo: "[image_in_base64_encoded_format]"
+  }
 )
+```
+
+#### List cards
+
+```ruby
+# List all cards for a template
+cards = client.access_cards.list("template_id")
+
+# List cards filtered by state
+active_cards = client.access_cards.list("template_id", "active")
 ```
 
 #### Manage card states
 
 ```ruby
 # Suspend a card
-client.access_cards.suspend(
-  card_id: "0xc4rd1d"
-)
+client.access_cards.suspend("0xc4rd1d")
 
 # Resume a card
-client.access_cards.resume(
-  card_id: "0xc4rd1d"
-)
+client.access_cards.resume("0xc4rd1d")
 
 # Unlink a card
-client.access_cards.unlink(
-  card_id: "0xc4rd1d"
-)
+client.access_cards.unlink("0xc4rd1d")
+
+# Delete a card
+client.access_cards.delete("0xc4rd1d")
 ```
 
 ### Enterprise Console
@@ -124,17 +156,19 @@ template = client.console.create_template(
 
 ```ruby
 template = client.console.update_template(
-  card_template_id: "0xd3adb00b5",
-  name: "Updated Employee NFC key",
-  allow_on_multiple_devices: true,
-  watch_count: 2,
-  iphone_count: 3,
-  support_info: {
-    support_url: "https://help.yourcompany.com",
-    support_phone_number: "+1-555-123-4567",
-    support_email: "support@yourcompany.com",
-    privacy_policy_url: "https://yourcompany.com/privacy",
-    terms_and_conditions_url: "https://yourcompany.com/terms"
+  "0xd3adb00b5",
+  {
+    name: "Updated Employee NFC key",
+    allow_on_multiple_devices: true,
+    watch_count: 2,
+    iphone_count: 3,
+    support_info: {
+      support_url: "https://help.yourcompany.com",
+      support_phone_number: "+1-555-123-4567",
+      support_email: "support@yourcompany.com",
+      privacy_policy_url: "https://yourcompany.com/privacy",
+      terms_and_conditions_url: "https://yourcompany.com/terms"
+    }
   }
 )
 ```
@@ -142,14 +176,24 @@ template = client.console.update_template(
 #### Read a template
 
 ```ruby
-template = client.console.read_template(
-  card_template_id: "0xd3adb00b5"
-)
+template = client.console.read_template("0xd3adb00b5")
 ```
 
 #### Get event logs
 
 ```ruby
+# New method
+logs = client.console.get_logs(
+  "0xd3adb00b5",
+  {
+    device: "mobile", # "mobile" or "watch"
+    start_date: (Time.now - 30*24*60*60).iso8601,
+    end_date: Time.now.iso8601,
+    event_type: "install"
+  }
+)
+
+# Legacy method still works
 events = client.console.event_log(
   card_template_id: "0xd3adb00b5",
   filters: {
@@ -179,6 +223,7 @@ The SDK throws specific errors for various scenarios:
 - `AccessGrid::AuthenticationError` - Invalid credentials
 - `AccessGrid::ResourceNotFoundError` - Requested resource not found
 - `AccessGrid::ValidationError` - Invalid parameters
+- `AccessGrid::AccessGridError` - Base exception for AccessGrid-specific errors
 - `AccessGrid::Error` - Generic API errors
 
 Example error handling:
