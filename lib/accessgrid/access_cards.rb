@@ -23,8 +23,8 @@ module AccessGrid
       Union.from_response(response)
     end
 
-    def list(template_id, state = nil)
-      params = { template_id: template_id }
+    def list(card_template_id, state = nil)
+      params = { card_template_id: card_template_id }
       params[:state] = state if state
 
       response = @client.make_request(:get, '/v1/key-cards', nil, params)

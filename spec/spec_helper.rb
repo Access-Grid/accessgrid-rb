@@ -27,14 +27,17 @@ RSpec.configure do |config|
 end
 
 def stub_api_request(method, path, status: 200, body: {}, request_body: nil)
-  stub = stub_request(method, "https://api.accessgrid.com#{path}")
+  # Use regex to match path with optional query params
+  url_pattern = %r{https://api\.accessgrid\.com#{Regexp.escape(path)}(\?.*)?}
+
+  stub = stub_request(method, url_pattern)
     .with(
       headers: {
         'Content-Type' => 'application/json',
         'X-ACCT-ID' => 'test_account'
       }
     )
-  
+
   # Add request body validation if provided
   if request_body
     stub.with(body: request_body)

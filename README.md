@@ -146,10 +146,10 @@ card = client.access_cards.update(
 
 ```ruby
 # List all cards for a template
-cards = client.access_cards.list("template_id")
+cards = client.access_cards.list("card_template_id")
 
 # List cards filtered by state
-active_cards = client.access_cards.list("template_id", "active")
+active_cards = client.access_cards.list("card_template_id", "active")
 ```
 
 #### Manage card states
