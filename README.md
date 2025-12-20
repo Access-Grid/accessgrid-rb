@@ -101,7 +101,7 @@ end
 
 Both `Card` and `UnifiedAccessPass` inherit from `Union` and share common properties:
 - `id` - The unique identifier
-- `url` / `install_url` - The installation URL
+- `url` - The installation URL
 - `state` - Current state of the pass
 
 #### Get a card or pass
@@ -115,7 +115,7 @@ if result.card?
   puts "Card ID: #{result.id}"
   puts "State: #{result.state}"
   puts "Full Name: #{result.full_name}"
-  puts "Install URL: #{result.install_url}"
+  puts "Install URL: #{result.url}"
   puts "Expiration Date: #{result.expiration_date}"
   puts "Card Number: #{result.card_number}"
   puts "Site Code: #{result.site_code}"

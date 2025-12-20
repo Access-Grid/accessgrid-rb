@@ -62,7 +62,6 @@ RSpec.describe AccessGrid::UnifiedAccessPass do
     expect(subject.id).to eq('TP-123')
     expect(subject.state).to eq('created')
     expect(subject.url).to eq('https://install.example.com')
-    expect(subject.install_url).to eq('https://install.example.com')
   end
 
   it 'has status property' do

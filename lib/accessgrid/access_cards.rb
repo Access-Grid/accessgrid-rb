@@ -60,14 +60,13 @@ module AccessGrid
   # Abstract base class for AccessCard and UnifiedAccessPass
   # Both types share common properties: id, url, state
   class Union
-    attr_reader :id, :state, :url, :install_url
+    attr_reader :id, :state, :url
 
     def initialize(data)
       data ||= {}
       @id = data.fetch('id', nil)
       @state = data.fetch('state', nil)
       @url = data.fetch('install_url', nil)
-      @install_url = data.fetch('install_url', nil)
     end
 
     # Factory method to create the appropriate type based on response
