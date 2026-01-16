@@ -40,6 +40,16 @@ module AccessGrid
       response['logs'] || []
     end
 
+    def list_pass_template_pairs(params = {})
+      response = @client.make_request(:get, '/v1/console/pass-template-pairs', nil, params)
+
+      if response['pass_template_pairs']
+        response['pass_template_pairs'] = response['pass_template_pairs'].map { |pair| PassTemplatePair.new(pair) }
+      end
+
+      response
+    end
+
     private
 
     def transform_template_params(params)
@@ -91,6 +101,28 @@ module AccessGrid
       @ip_address = data['ip_address']
       @user_agent = data['user_agent']
       @metadata = data['metadata']
+    end
+  end
+
+  class PassTemplatePair
+    attr_reader :id, :name, :created_at, :android_template, :ios_template
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @created_at = data['created_at']
+      @android_template = data['android_template'] ? TemplateInfo.new(data['android_template']) : nil
+      @ios_template = data['ios_template'] ? TemplateInfo.new(data['ios_template']) : nil
+    end
+  end
+
+  class TemplateInfo
+    attr_reader :id, :name, :platform
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @platform = data['platform']
     end
   end
 end
