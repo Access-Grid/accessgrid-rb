@@ -48,14 +48,14 @@ RSpec.describe AccessGrid::Console do
     end
 
     it 'creates a new template' do
-      stub_api_request(:post, '/api/v1/enterprise/templates', body: success_response)
-      
+      stub_api_request(:post, '/v1/console/card-templates', body: success_response)
+
       template = console.create_template(template_params)
       
       expect(template).to be_a(AccessGrid::Template)
       expect(template.id).to eq('template_123')
       expect(template.name).to eq('Employee Badge')
-      expect(template.allow_on_multiple_devices).to be true
+      expect(template.allowed_device_counts['allow_on_multiple_devices']).to be true
     end
   end
 
@@ -84,10 +84,10 @@ RSpec.describe AccessGrid::Console do
     it 'fetches event logs with filters' do
       stub_api_request(
         :get,
-        '/api/v1/enterprise/templates/template_123/logs',
+        '/v1/console/card-templates/template_123/logs',
         body: log_response
       )
-      
+
       events = console.event_log(
         card_template_id: 'template_123',
         filters: {

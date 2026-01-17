@@ -64,20 +64,67 @@ card = client.access_cards.provision(
 puts "Install URL: #{card.url}"
 ```
 
-#### Get a card
+#### UnifiedAccessPass (Template Pairs)
+
+When issuing a card to a template pair (combined Apple + Android templates), the API returns a `UnifiedAccessPass` instead of a single `Card`. The SDK automatically detects this and returns the appropriate type.
 
 ```ruby
-card = client.access_cards.get(card_id: "0xc4rd1d")
+# Issue to a template pair
+result = client.access_cards.issue(
+  card_template_id: template_pair_id,
+  employee_id: "123456789",
+  full_name: "Employee name",
+  # ...other parameters
+)
 
-puts "Card ID: #{card.id}"
-puts "State: #{card.state}"
-puts "Full Name: #{card.full_name}"
-puts "Install URL: #{card.install_url}"
-puts "Expiration Date: #{card.expiration_date}"
-puts "Card Number: #{card.card_number}"
-puts "Site Code: #{card.site_code}"
-puts "Devices: #{card.devices.length}"
-puts "Metadata: #{card.metadata}"
+# Check which type was returned
+if result.unified_access_pass?
+  # UnifiedAccessPass contains both Apple and Android cards
+  puts "UnifiedAccessPass ID: #{result.id}"
+  puts "State: #{result.state}"
+  puts "Status: #{result.status}"
+  puts "Install URL: #{result.url}"
+  puts "Number of cards: #{result.details.length}"
+
+  # Access individual cards in the details array
+  result.details.each do |card|
+    puts "  Card ID: #{card.id}"
+    puts "  Card Template: #{card.card_template_id}"
+    puts "  State: #{card.state}"
+  end
+elsif result.card?
+  # Single card response
+  puts "Card ID: #{result.id}"
+  puts "Install URL: #{result.url}"
+end
+```
+
+Both `Card` and `UnifiedAccessPass` inherit from `Union` and share common properties:
+- `id` - The unique identifier
+- `url` - The installation URL
+- `state` - Current state of the pass
+
+#### Get a card or pass
+
+The `get` method returns either a `Card` or `UnifiedAccessPass` depending on the ID provided.
+
+```ruby
+result = client.access_cards.get(card_id: "0xc4rd1d")
+
+if result.card?
+  puts "Card ID: #{result.id}"
+  puts "State: #{result.state}"
+  puts "Full Name: #{result.full_name}"
+  puts "Install URL: #{result.url}"
+  puts "Expiration Date: #{result.expiration_date}"
+  puts "Card Number: #{result.card_number}"
+  puts "Site Code: #{result.site_code}"
+  puts "Devices: #{result.devices.length}"
+  puts "Metadata: #{result.metadata}"
+elsif result.unified_access_pass?
+  puts "UnifiedAccessPass ID: #{result.id}"
+  puts "Cards: #{result.details.length}"
+end
 ```
 
 #### Update a card
@@ -99,10 +146,10 @@ card = client.access_cards.update(
 
 ```ruby
 # List all cards for a template
-cards = client.access_cards.list("template_id")
+cards = client.access_cards.list("card_template_id")
 
 # List cards filtered by state
-active_cards = client.access_cards.list("template_id", "active")
+active_cards = client.access_cards.list("card_template_id", "active")
 ```
 
 #### Manage card states
