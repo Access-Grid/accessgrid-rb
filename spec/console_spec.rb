@@ -48,7 +48,7 @@ RSpec.describe AccessGrid::Console do
     end
 
     it 'creates a new template' do
-      stub_api_request(:post, '/api/v1/enterprise/templates', body: success_response)
+      stub_api_request(:post, '/v1/console/card-templates', body: success_response)
 
       template = console.create_template(template_params)
 
