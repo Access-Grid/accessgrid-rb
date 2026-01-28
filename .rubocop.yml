@@ -1,0 +1,12 @@
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/MethodLength:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+
+Style/Documentation:
+    Enabled: false
