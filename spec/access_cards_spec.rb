@@ -89,7 +89,7 @@ RSpec.describe AccessGrid::AccessCards do
         body: state_response
       )
 
-      card = cards.suspend(card_id: 'card_123')
+      card = cards.suspend('card_123')
       expect(card.state).to eq('suspended')
     end
 
@@ -101,7 +101,7 @@ RSpec.describe AccessGrid::AccessCards do
         body: response
       )
 
-      card = cards.resume(card_id: 'card_123')
+      card = cards.resume('card_123')
       expect(card.state).to eq('active')
     end
   end
