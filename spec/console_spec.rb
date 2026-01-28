@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe AccessGrid::Console do
@@ -49,9 +51,9 @@ RSpec.describe AccessGrid::Console do
 
     it 'creates a new template' do
       stub_api_request(:post, '/api/v1/enterprise/templates', body: success_response)
-      
+
       template = console.create_template(template_params)
-      
+
       expect(template).to be_a(AccessGrid::Template)
       expect(template.id).to eq('template_123')
       expect(template.name).to eq('Employee Badge')
@@ -87,7 +89,7 @@ RSpec.describe AccessGrid::Console do
         '/api/v1/enterprise/templates/template_123/logs',
         body: log_response
       )
-      
+
       events = console.event_log(
         card_template_id: 'template_123',
         filters: {
@@ -95,7 +97,7 @@ RSpec.describe AccessGrid::Console do
           start_date: '2025-01-01T00:00:00Z'
         }
       )
-      
+
       expect(events).to be_an(Array)
       expect(events.first).to be_an(AccessGrid::Event)
       expect(events.first.type).to eq('install')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/accessgrid.rb
 require 'base64'
 require 'json'
@@ -14,22 +16,18 @@ module AccessGrid
   class AuthenticationError < Error; end
   class ResourceNotFoundError < Error; end
   class ValidationError < Error; end
-  
+
   # Additional error classes to match Python version
   class AccessGridError < Error; end
-  
+
   class Client
     attr_reader :account_id, :api_secret, :api_host
-    
+
     def initialize(account_id, api_secret, api_host = 'https://api.accessgrid.com')
-      if account_id.nil? || account_id.empty?
-        raise ArgumentError, "Account ID is required"
-      end
-      
-      if api_secret.nil? || api_secret.empty?
-        raise ArgumentError, "API Secret is required"
-      end
-      
+      raise ArgumentError, 'Account ID is required' if account_id.nil? || account_id.empty?
+
+      raise ArgumentError, 'API Secret is required' if api_secret.nil? || api_secret.empty?
+
       @account_id = account_id
       @api_secret = api_secret
       @api_host = api_host.chomp('/')
@@ -45,87 +43,81 @@ module AccessGrid
 
     def make_request(method, path, body = nil, params = nil)
       uri = URI.parse("#{api_host}#{path}")
-      
+
       # Add query parameters if present
-      if params && !params.empty?
-        uri.query = URI.encode_www_form(params)
-      end
-      
+      uri.query = URI.encode_www_form(params) if params && !params.empty?
+
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == 'https'
 
       # Create request object based on method
       request = case method
-      when :get
-        Net::HTTP::Get.new(uri.request_uri)
-      when :post
-        Net::HTTP::Post.new(uri.request_uri)
-      when :put
-        Net::HTTP::Put.new(uri.request_uri)
-      when :patch
-        Net::HTTP::Patch.new(uri.request_uri)
-      else
-        raise ArgumentError, "Unsupported HTTP method: #{method}"
-      end
+                when :get
+                  Net::HTTP::Get.new(uri.request_uri)
+                when :post
+                  Net::HTTP::Post.new(uri.request_uri)
+                when :put
+                  Net::HTTP::Put.new(uri.request_uri)
+                when :patch
+                  Net::HTTP::Patch.new(uri.request_uri)
+                else
+                  raise ArgumentError, "Unsupported HTTP method: #{method}"
+                end
 
       # Set headers
       request['Content-Type'] = 'application/json'
       request['X-ACCT-ID'] = account_id
       request['User-Agent'] = "accessgrid.rb @ v#{AccessGrid::VERSION}"
-      
+
       # Extract resource ID from the path if needed for signature
       resource_id = nil
       if method == :get || (method == :post && (body.nil? || body.empty?))
         parts = path.strip.split('/')
         if parts.length >= 2
-          if ['suspend', 'resume', 'unlink', 'delete'].include?(parts.last)
-            resource_id = parts[-2]
-          else
-            resource_id = parts.last
-          end
+          resource_id = if %w[suspend resume unlink delete].include?(parts.last)
+                          parts[-2]
+                        else
+                          parts.last
+                        end
         end
       end
-      
+
       # Handle signature generation
       if method == :get || (method == :post && (body.nil? || body.empty?))
         payload = resource_id ? { id: resource_id }.to_json : '{}'
-        
+
         # Include sig_payload in query params if needed
         if resource_id
-          if params.nil?
-            params = {}
-          end
+          params = {} if params.nil?
           params[:sig_payload] = { id: resource_id }.to_json
-          
+
           # Update the URI with the new params
           uri.query = URI.encode_www_form(params)
           request = case method
-          when :get
-            Net::HTTP::Get.new(uri.request_uri)
-          when :post
-            Net::HTTP::Post.new(uri.request_uri)
-          end
-          
+                    when :get
+                      Net::HTTP::Get.new(uri.request_uri)
+                    when :post
+                      Net::HTTP::Post.new(uri.request_uri)
+                    end
+
           # Reset headers after creating new request
           request['Content-Type'] = 'application/json'
           request['X-ACCT-ID'] = account_id
           request['User-Agent'] = "accessgrid.rb @ v#{AccessGrid::VERSION}"
         end
       else
-        payload = body ? body.to_json : ""
+        payload = body ? body.to_json : ''
       end
-      
+
       # Generate signature
       request['X-PAYLOAD-SIG'] = generate_signature(payload)
-      
+
       # Add the body to the request
-      if body && method != :get
-        request.body = body.to_json
-      end
+      request.body = body.to_json if body && method != :get
 
       # Make request
       response = http.request(request)
-      
+
       # Parse response
       handle_response(response)
     end
@@ -135,7 +127,7 @@ module AccessGrid
     def generate_signature(payload)
       # Base64 encode the payload
       encoded_payload = Base64.strict_encode64(payload.to_s)
-      
+
       # Generate SHA256 hash
       OpenSSL::HMAC.hexdigest(
         OpenSSL::Digest.new('sha256'),

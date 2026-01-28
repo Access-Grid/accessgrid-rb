@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/accessgrid/console.rb
 module AccessGrid
   class Console
@@ -24,15 +26,13 @@ module AccessGrid
 
     def get_logs(template_id, params = {})
       response = @client.make_request(:get, "/v1/console/card-templates/#{template_id}/logs", nil, params)
-      
+
       # Return full response to match Python's behavior
-      if response['logs']
-        response['logs'] = response['logs'].map { |log| Event.new(log) }
-      end
-      
+      response['logs'] = response['logs'].map { |log| Event.new(log) } if response['logs']
+
       response
     end
-    
+
     # Keep event_log for backwards compatibility
     def event_log(params)
       template_id = params.delete(:card_template_id)
@@ -55,7 +55,7 @@ module AccessGrid
     def transform_template_params(params)
       design = params.delete(:design) || {}
       support_info = params.delete(:support_info) || {}
-      
+
       params.merge(
         background_color: design[:background_color],
         label_color: design[:label_color],
@@ -70,7 +70,7 @@ module AccessGrid
   end
 
   class Template
-    attr_reader :id, :name, :platform, :protocol, :use_case, :created_at, 
+    attr_reader :id, :name, :platform, :protocol, :use_case, :created_at,
                 :last_published_at, :issued_keys_count, :active_keys_count,
                 :allowed_device_counts, :support_settings, :terms_settings, :style_settings
 

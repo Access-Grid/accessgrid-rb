@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/accessgrid/access_cards.rb
 module AccessGrid
   class AccessCards
@@ -9,7 +11,7 @@ module AccessGrid
       response = @client.make_request(:post, '/v1/key-cards', params)
       Card.new(response)
     end
-    
+
     # Alias provision to issue for backward compatibility
     alias provision issue
 
@@ -22,22 +24,13 @@ module AccessGrid
       response = @client.make_request(:patch, "/v1/key-cards/#{card_id}", params)
       Card.new(response)
     end
-    
+
     def list(template_id, state = nil)
       params = { template_id: template_id }
       params[:state] = state if state
-      
+
       response = @client.make_request(:get, '/v1/key-cards', nil, params)
       response.fetch('keys', []).map { |item| Card.new(item) }
-    end
-
-    private def manage_state(card_id, action)
-      response = @client.make_request(
-        :post, 
-        "/v1/key-cards/#{card_id}/#{action}", 
-        {}
-      )
-      Card.new(response)
     end
 
     def suspend(card_id)
@@ -51,9 +44,20 @@ module AccessGrid
     def unlink(card_id)
       manage_state(card_id, 'unlink')
     end
-    
+
     def delete(card_id)
       manage_state(card_id, 'delete')
+    end
+
+    private
+
+    def manage_state(card_id, action)
+      response = @client.make_request(
+        :post,
+        "/v1/key-cards/#{card_id}/#{action}",
+        {}
+      )
+      Card.new(response)
     end
   end
 
