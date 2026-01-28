@@ -13,7 +13,6 @@ RSpec.describe AccessGrid::Console do
         platform: 'apple',
         use_case: 'employee_badge',
         protocol: 'desfire',
-        allow_on_multiple_devices: true,
         watch_count: 2,
         iphone_count: 3,
         design: {
@@ -34,7 +33,6 @@ RSpec.describe AccessGrid::Console do
         platform: 'apple',
         protocol: 'desfire',
         allowed_device_counts: {
-          allow_on_multiple_devices: true,
           watch: 2,
           iphone: 3
         },
@@ -57,7 +55,6 @@ RSpec.describe AccessGrid::Console do
       expect(template).to be_a(AccessGrid::Template)
       expect(template.id).to eq('template_123')
       expect(template.name).to eq('Employee Badge')
-      expect(template.allow_on_multiple_devices).to be true
     end
   end
 
