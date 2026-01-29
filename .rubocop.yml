@@ -11,5 +11,11 @@ Metrics/MethodLength:
   Exclude:
     - 'spec/**/*'
 
+Naming/VariableNumber:
+  Enabled: true
+  EnforcedStyle: snake_case
+  CheckMethodNames: true
+  CheckSymbols: true
+
 Style/Documentation:
     Enabled: false
