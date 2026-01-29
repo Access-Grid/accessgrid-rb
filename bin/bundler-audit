@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'bundler/audit/cli'
+
+ARGV.concat %w[--config .bundler-audit.yml] if ARGV.empty? || ARGV.include?('check')
+Bundler::Audit::CLI.start
