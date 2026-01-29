@@ -42,7 +42,7 @@ module AccessGrid
       request = generate_request(method, uri, account_id)
 
       # generate a payload, and maybe generate a new request for a get or post signature
-      payload, new_request, new_uri = generate_signature_payload_and_request(method, uri, body, path, account_id)
+      payload, new_request, new_uri = generate_signature_payload_and_request(method, uri, body, path, account_id, params)
       request = new_request || request
       uri = new_uri || uri
 
@@ -93,7 +93,7 @@ module AccessGrid
       end
     end
 
-    def generate_signature_payload_and_request(method_name, uri, body, path, account_id)
+    def generate_signature_payload_and_request(method_name, uri, body, path, account_id, params)
       payload = body&.to_json || ''
       request = nil
 
@@ -101,7 +101,7 @@ module AccessGrid
 
       resource_id = generate_resource_id(method_name, body, path)
       payload = generate_signature_payload(resource_id)
-      request = generate_signature_request(method_name, uri, resource_id, account_id)
+      request = generate_signature_request(method_name, uri, resource_id, account_id, params)
 
       [payload, request]
     end
@@ -127,7 +127,7 @@ module AccessGrid
       end
     end
 
-    def generate_signature_request(method_name, uri, resource_id, account_id)
+    def generate_signature_request(method_name, uri, resource_id, account_id, params)
       return nil unless resource_id
 
       params = {} if params.nil?
