@@ -27,7 +27,7 @@ RSpec.describe AccessGrid::AccessCards do
     end
 
     it 'creates a new access card' do
-      stub_api_request(:post, '/api/v1/nfc_keys/issue', body: success_response)
+      stub_api_request(:post, '/v1/key-cards', body: success_response, request_body: provision_params)
 
       card = cards.provision(provision_params)
 
@@ -39,7 +39,7 @@ RSpec.describe AccessGrid::AccessCards do
 
     it 'handles validation errors' do
       error_response = { status: 'error', message: 'Invalid parameters' }
-      stub_api_request(:post, '/api/v1/nfc_keys/issue', status: 422, body: error_response)
+      stub_api_request(:post, '/v1/key-cards', status: 422, body: error_response, request_body: provision_params)
 
       expect { cards.provision(provision_params) }
         .to raise_error(AccessGrid::ValidationError, 'Invalid parameters')
@@ -64,9 +64,9 @@ RSpec.describe AccessGrid::AccessCards do
         full_name: 'Updated Name'
       }
 
-      stub_api_request(:put, '/api/v1/nfc_keys/card_123', body: success_response)
+      stub_api_request(:patch, '/v1/key-cards/card_123', body: success_response, request_body: update_params)
 
-      card = cards.update(update_params)
+      card = cards.update('card_123', update_params)
 
       expect(card.full_name).to eq('Updated Name')
     end
@@ -85,8 +85,9 @@ RSpec.describe AccessGrid::AccessCards do
     it 'suspends a card' do
       stub_api_request(
         :post,
-        '/api/v1/nfc_keys/card_123/manage',
-        body: state_response
+        '/v1/key-cards/card_123/suspend',
+        body: state_response,
+        query: generate_sig_payload(id: :card_123)
       )
 
       card = cards.suspend('card_123')
@@ -97,8 +98,9 @@ RSpec.describe AccessGrid::AccessCards do
       response = state_response.merge(state: 'active')
       stub_api_request(
         :post,
-        '/api/v1/nfc_keys/card_123/manage',
-        body: response
+        '/v1/key-cards/card_123/resume',
+        body: response,
+        query: generate_sig_payload(id: :card_123)
       )
 
       card = cards.resume('card_123')

@@ -26,8 +26,15 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 end
 
-def stub_api_request(method, path, status: 200, body: {}, request_body: nil)
-  stub = stub_request(method, "https://api.accessgrid.com#{path}")
+def generate_sig_payload(id:)
+  { sig_payload: { id: id }.to_json }
+end
+
+def stub_api_request(method_type, path, status: 200, body: {}, request_body: nil, query: {})
+  query_string = URI.encode_www_form(query)
+  stubbed_url = URI::HTTPS.build(host: 'api.accessgrid.com', path: path, query: query_string).to_s
+
+  stub = stub_request(method_type, stubbed_url)
          .with(
            headers: {
              'Content-Type' => 'application/json',

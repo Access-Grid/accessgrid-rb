@@ -81,19 +81,20 @@ RSpec.describe AccessGrid::Console do
     end
 
     it 'fetches event logs with filters' do
-      stub_api_request(
-        :get,
-        '/api/v1/enterprise/templates/template_123/logs',
-        body: log_response
-      )
+      injected_params = generate_sig_payload(id: :logs)
 
-      events = console.event_log(
-        card_template_id: 'template_123',
+      params = {
         filters: {
           device: 'mobile',
           start_date: '2025-01-01T00:00:00Z'
         }
-      )
+      }
+
+      query = params.merge(injected_params)
+
+      stub_api_request(:get, '/v1/console/card-templates/template_123/logs', body: log_response, query: query)
+
+      events = console.event_log(params.merge(card_template_id: 'template_123'))
 
       expect(events).to be_an(Array)
       expect(events.first).to be_an(AccessGrid::Event)
