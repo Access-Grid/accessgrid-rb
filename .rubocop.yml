@@ -11,6 +11,11 @@ Metrics/MethodLength:
   Exclude:
     - 'spec/**/*'
 
+Metrics/ParameterLists:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+
 Naming/VariableNumber:
   Enabled: true
   EnforcedStyle: snake_case
