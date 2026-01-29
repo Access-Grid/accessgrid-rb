@@ -1,3 +1,6 @@
+AllCops:
+  SuggestExtensions: false
+
 Metrics/BlockLength:
   Enabled: true
   Exclude:
