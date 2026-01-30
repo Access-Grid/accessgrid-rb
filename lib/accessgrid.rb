@@ -72,26 +72,27 @@ module AccessGrid
 
     def handle_response(response)
       case response.code.to_i
-      when 200, 201, 202
-        JSON.parse(response.body)
-      when 401
-        raise AuthenticationError, 'Invalid credentials'
-      when 402
-        raise Error, 'Insufficient account balance'
-      when 404
-        raise ResourceNotFoundError, 'Resource not found'
-      when 422
-        raise ValidationError, JSON.parse(response.body)['message']
+      when 200, 201, 202 then JSON.parse(response.body)
+      when 401 then raise AuthenticationError, 'Invalid credentials'
+      when 402 then raise Error, 'Insufficient account balance'
+      when 404 then raise ResourceNotFoundError, 'Resource not found'
+      when 422 then raise ValidationError, JSON.parse(response.body)['message']
       else
-        error_message = response.body.empty? ? "HTTP Status #{response.code}" : response.body
-        begin
-          error_data = JSON.parse(response.body)
-          error_message = error_data['message'] if error_data['message']
-        rescue JSON::ParserError
-          # If it's not valid JSON, just use the response body
-        end
-        raise Error, "API request failed: #{error_message}"
+        process_unhandled_response(response)
       end
+    end
+
+    def process_unhandled_response(response)
+      error_message = response.body.empty? ? "HTTP Status #{response.code}" : response.body
+
+      begin
+        error_data = JSON.parse(response.body)
+        error_message = error_data['message'] if error_data['message']
+      rescue JSON::ParserError
+        # If it's not valid JSON, just use the response body
+      end
+
+      raise Error, "API request failed: #{error_message}"
     end
 
     def generate_signature_payload_and_request(method_name, uri, body, path, account_id, params)

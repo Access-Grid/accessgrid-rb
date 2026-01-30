@@ -1,18 +1,41 @@
 AllCops:
   SuggestExtensions: false
 
+Metrics/AbcSize:
+  Enabled: true
+  IgnoredMethods:
+    - initialize
+
 Metrics/BlockLength:
   Enabled: true
   Exclude:
     - 'spec/**/*'
 
+Metrics/ClassLength:
+  Enabled: true
+  Max: 125
+  CountComments: false
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
 Metrics/MethodLength:
   Enabled: true
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
   Exclude:
     - 'spec/**/*'
+  IgnoredMethods:
+    - initialize
 
 Metrics/ParameterLists:
   Enabled: true
+  Max: 5
   Exclude:
     - 'spec/**/*'
 
