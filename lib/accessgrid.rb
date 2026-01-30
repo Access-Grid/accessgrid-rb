@@ -42,7 +42,8 @@ module AccessGrid
       request = generate_request(method, uri, account_id)
 
       # generate a payload, and maybe generate a new request for a get or post signature
-      payload, new_request, new_uri = generate_signature_payload_and_request(method, uri, body, path, account_id, params)
+      payload, new_request, new_uri = generate_signature_payload_and_request(method, uri, body, path, account_id,
+                                                                             params)
       request = new_request || request
       uri = new_uri || uri
 
