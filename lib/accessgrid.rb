@@ -53,7 +53,6 @@ module AccessGrid
     private
 
     def perform_request_and_handle_response(method_name, request, uri, body, payload)
-      pp [uri.host, uri.port]
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == 'https'
 

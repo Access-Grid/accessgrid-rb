@@ -34,8 +34,6 @@ def stub_api_request(method_type, path, status: 200, body: {}, request_body: nil
   query_string = URI.encode_www_form(query)
   stubbed_url = URI::HTTPS.build(host: 'api.accessgrid.com', path: path, query: query_string).to_s
 
-  pp stubbed_url
-
   stub = stub_request(method_type, stubbed_url)
          .with(
            headers: {
