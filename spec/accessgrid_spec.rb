@@ -21,7 +21,7 @@ RSpec.describe AccessGrid do
   describe '#generate_signature' do
     it 'generates correct HMAC signature' do
       payload = { test: 'data' }.to_json
-      signature = client.send(:generate_signature, payload)
+      signature = client.send(:generate_signature_hash, payload)
       expect(signature).to be_a(String)
       expect(signature.length).to eq(64) # SHA256 hex digest length
     end
