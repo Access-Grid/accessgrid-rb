@@ -9,17 +9,10 @@ require 'uri'
 
 require_relative 'accessgrid/access_cards'
 require_relative 'accessgrid/console'
+require_relative 'accessgrid/error'
 require_relative 'accessgrid/version'
 
 module AccessGrid
-  class Error < StandardError; end
-  class AuthenticationError < Error; end
-  class ResourceNotFoundError < Error; end
-  class ValidationError < Error; end
-
-  # Additional error classes to match Python version
-  class AccessGridError < Error; end
-
   class Client
     attr_reader :access_cards, :account_id, :api_secret, :api_host, :console
 
