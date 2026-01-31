@@ -7,9 +7,9 @@ require 'net/http'
 require 'openssl'
 require 'uri'
 
-require_relative 'accessgrid/version'
 require_relative 'accessgrid/access_cards'
 require_relative 'accessgrid/console'
+require_relative 'accessgrid/version'
 
 module AccessGrid
   class Error < StandardError; end
