@@ -14,5 +14,6 @@ group :development, :test do
   gem 'rexml', '>= 3.4.2'
   gem 'rspec', '~> 3.0'
   gem 'rubocop', '~> 1.84'
+  gem 'simplecov', require: false
   gem 'webmock', '~> 3.0'
 end

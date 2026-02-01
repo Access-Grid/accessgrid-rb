@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 # spec/spec_helper.rb
+require 'simplecov'
+SimpleCov.start do
+  add_filter '/spec/'
+  enable_coverage :branch
+end
+
 require 'bundler/setup'
 require 'webmock/rspec'
 require 'accessgrid'
