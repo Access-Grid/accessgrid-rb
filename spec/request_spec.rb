@@ -98,37 +98,6 @@ RSpec.describe AccessGrid::Request do
 
       expect(request.uri.query).to be_nil
     end
-
-    describe '#host' do
-      it 'returns the URI host' do
-        request = build_request(host: 'https://custom.host.com')
-        expect(request.host).to eq('custom.host.com')
-      end
-    end
-
-    describe '#port' do
-      it 'returns 443 for https' do
-        request = build_request(host: 'https://api.example.com')
-        expect(request.port).to eq(443)
-      end
-
-      it 'returns 80 for http' do
-        request = build_request(host: 'http://api.example.com')
-        expect(request.port).to eq(80)
-      end
-    end
-
-    describe '#use_ssl?' do
-      it 'returns true for https' do
-        request = build_request(host: 'https://api.example.com')
-        expect(request.use_ssl?).to be true
-      end
-
-      it 'returns false for http' do
-        request = build_request(host: 'http://api.example.com')
-        expect(request.use_ssl?).to be false
-      end
-    end
   end
 
   describe 'payload generation' do

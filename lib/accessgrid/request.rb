@@ -3,6 +3,7 @@
 require 'uri'
 
 module AccessGrid
+  # Builds and configures HTTP requests for the AccessGrid API.
   class Request
     PAYLOAD_SIGNATURE_PARAM = :sig_payload
 
@@ -36,29 +37,20 @@ module AccessGrid
       end
     end
 
-    def host
-      uri.host
-    end
-
-    def port
-      uri.port
-    end
-
-    def use_ssl?
-      uri.scheme == 'https'
-    end
-
     private
 
     def generate_net_http_request!
-      case http_method
-      when :get   then  Net::HTTP::Get.new(uri.request_uri)
-      when :post  then  Net::HTTP::Post.new(uri.request_uri)
-      when :put   then  Net::HTTP::Put.new(uri.request_uri)
-      when :patch then  Net::HTTP::Patch.new(uri.request_uri)
-      else
-        raise ArgumentError, "Unsupported HTTP method: #{http_method}"
-      end
+      klass =
+        case http_method
+        when :get   then  Net::HTTP::Get
+        when :post  then  Net::HTTP::Post
+        when :put   then  Net::HTTP::Put
+        when :patch then  Net::HTTP::Patch
+        else
+          raise ArgumentError, "Unsupported HTTP method: #{http_method}"
+        end
+
+      klass.new(uri.request_uri)
     end
 
     def initialize_payload
@@ -76,8 +68,8 @@ module AccessGrid
     end
 
     def initialize_uri
-      @uri = URI.parse("#{@provided_host}#{@provided_path}").tap do |u|
-        u.query = URI.encode_www_form(@params) if @params.any?
+      @uri = URI.parse("#{@provided_host}#{@provided_path}").tap do |parsed_uri|
+        parsed_uri.query = URI.encode_www_form(@params) if @params.any?
       end
     end
 
@@ -88,7 +80,9 @@ module AccessGrid
       parts = @provided_path.strip.split('/')
       return @resource_id = nil unless parts.length >= 2
 
-      @resource_id = %w[suspend resume unlink delete].include?(parts.last) ? parts[-2] : parts.last
+      last_part = parts.last
+      second_to_last_part = parts[-2]
+      @resource_id = %w[suspend resume unlink delete].include?(last_part) ? second_to_last_part : last_part
     end
 
     def get?

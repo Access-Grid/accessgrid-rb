@@ -2,6 +2,7 @@
 
 # lib/accessgrid/access_cards.rb
 module AccessGrid
+  # Manages NFC key card lifecycle operations.
   class AccessCards
     def initialize(client)
       @client = client
@@ -61,6 +62,7 @@ module AccessGrid
     end
   end
 
+  # Represents an NFC key card with its attributes and state.
   class Card
     attr_reader :id, :state, :url, :install_url, :details, :full_name,
                 :expiration_date, :card_template_id, :card_number, :site_code,
@@ -68,10 +70,11 @@ module AccessGrid
 
     def initialize(data)
       data ||= {}
+      install_url = data.fetch('install_url', nil)
       @id = data.fetch('id', nil)
       @state = data.fetch('state', nil)
-      @url = data.fetch('install_url', nil)
-      @install_url = data.fetch('install_url', nil)
+      @url = install_url
+      @install_url = install_url
       @details = data.fetch('details', nil)
       @full_name = data.fetch('full_name', nil)
       @expiration_date = data.fetch('expiration_date', nil)

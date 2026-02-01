@@ -13,7 +13,9 @@ require_relative 'accessgrid/error'
 require_relative 'accessgrid/request'
 require_relative 'accessgrid/version'
 
+# Ruby SDK for the AccessGrid API.
 module AccessGrid
+  # API client for AccessGrid key card and template management.
   class Client
     attr_reader :access_cards, :account_id, :api_secret, :api_host, :console
 
@@ -44,11 +46,12 @@ module AccessGrid
     private
 
     def execute_and_process_request!(request)
-      http = Net::HTTP.new(request.host, request.port)
-      http.use_ssl = request.use_ssl?
-      net_http_request = request.net_http_request
+      # set up net http
+      uri = request.uri
+      http = Net::HTTP.new(uri.host, uri.port).tap { |http| http.use_ssl = uri.scheme == 'https' }
 
       # Generate signature
+      net_http_request = request.net_http_request
       net_http_request['X-PAYLOAD-SIG'] = generate_signature_hash(request.payload)
 
       # Make request
@@ -71,10 +74,11 @@ module AccessGrid
     end
 
     def process_unhandled_response(response)
-      error_message = response.body.empty? ? "HTTP Status #{response.code}" : response.body
+      body = response.body
+      error_message = body.empty? ? "HTTP Status #{response.code}" : body
 
       begin
-        error_data = JSON.parse(response.body)
+        error_data = JSON.parse(body)
         error_message = error_data['message'] if error_data['message']
       rescue JSON::ParserError
         # If it's not valid JSON, just use the response body
