@@ -2,6 +2,9 @@ AllCops:
   SuggestExtensions: false
   NewCops: enable
 
+Gemspec/DevelopmentDependencies:
+  Enabled: true
+
 Gemspec/RequireMFA:
   Enabled: false
 
