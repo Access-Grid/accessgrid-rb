@@ -44,8 +44,8 @@ module AccessGrid
     private
 
     def execute_and_process_request!(request)
-      http = Net::HTTP.new(request.uri.host, request.uri.port)
-      http.use_ssl = request.uri.scheme == 'https'
+      http = Net::HTTP.new(request.host, request.port)
+      http.use_ssl = request.use_ssl?
       net_http_request = request.net_http_request
 
       # Generate signature

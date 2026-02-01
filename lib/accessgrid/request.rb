@@ -11,8 +11,8 @@ module AccessGrid
     def initialize(attrs)
       # required attributes
       @http_method = attrs.fetch(:http_method)
-      @host = attrs.fetch(:host)
-      @path = attrs.fetch(:path)
+      @provided_host = attrs.fetch(:host)
+      @provided_path = attrs.fetch(:path)
 
       # optional attributes
       @account_id = attrs.fetch(:account_id, nil)
@@ -34,6 +34,18 @@ module AccessGrid
 
         req.body = body.to_json if body && !get?
       end
+    end
+
+    def host
+      uri.host
+    end
+
+    def port
+      uri.port
+    end
+
+    def use_ssl?
+      uri.scheme == 'https'
     end
 
     private
@@ -64,7 +76,7 @@ module AccessGrid
     end
 
     def initialize_uri
-      @uri = URI.parse("#{@host}#{@path}").tap do |u|
+      @uri = URI.parse("#{@provided_host}#{@provided_path}").tap do |u|
         u.query = URI.encode_www_form(@params) if @params.any?
       end
     end
@@ -73,7 +85,7 @@ module AccessGrid
       return @resource_id if defined?(@resource_id)
       return @resource_id = nil unless post_without_body_or_get?
 
-      parts = @path.strip.split('/')
+      parts = @provided_path.strip.split('/')
       return @resource_id = nil unless parts.length >= 2
 
       @resource_id = %w[suspend resume unlink delete].include?(parts.last) ? parts[-2] : parts.last
