@@ -3,7 +3,7 @@ AllCops:
 
 Metrics/AbcSize:
   Enabled: true
-  IgnoredMethods:
+  AllowedMethods:
     - initialize
 
 Metrics/BlockLength:
@@ -30,7 +30,7 @@ Metrics/MethodLength:
     - method_call
   Exclude:
     - 'spec/**/*'
-  IgnoredMethods:
+  AllowedMethods:
     - initialize
 
 Metrics/ParameterLists:
@@ -46,4 +46,4 @@ Naming/VariableNumber:
   CheckSymbols: true
 
 Style/Documentation:
-    Enabled: false
+  Enabled: false
