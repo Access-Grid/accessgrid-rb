@@ -1,5 +1,6 @@
 AllCops:
   SuggestExtensions: false
+  NewCops: enable
 
 Metrics/AbcSize:
   Enabled: true
