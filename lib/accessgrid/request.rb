@@ -4,7 +4,9 @@ require 'uri'
 
 module AccessGrid
   class Request
-    attr_reader :account_id, :body, :http_method, :params, :uri
+    PAYLOAD_SIGNATURE_PARAM = :sig_payload
+
+    attr_reader :account_id, :body, :http_method, :params, :payload, :uri
 
     def initialize(attrs)
       # required attributes
@@ -18,28 +20,12 @@ module AccessGrid
       @params = attrs.fetch(:params, nil) || {}
 
       # computed attributes
-      @uri = URI.parse("#{@host}#{@path}")
-    end
-
-    def payload
-      return @payload if defined?(@payload)
-      return @payload = default_payload unless post_without_body_or_get?
-
-      if resource_id
-        @payload = { id: resource_id }.to_json
-        @params[:sig_payload] = @payload
-        @uri.query = URI.encode_www_form(@params)
-      else
-        @payload = '{}'
-      end
-
-      @payload
+      initialize_payload
+      initialize_uri
     end
 
     def net_http_request
       return @net_http_request if defined?(@net_http_request)
-
-      payload
 
       @net_http_request = generate_net_http_request!.tap do |req|
         req['Content-Type'] = 'application/json'
@@ -60,6 +46,26 @@ module AccessGrid
       when :patch then  Net::HTTP::Patch.new(uri.request_uri)
       else
         raise ArgumentError, "Unsupported HTTP method: #{http_method}"
+      end
+    end
+
+    def initialize_payload
+      return @payload if defined?(@payload)
+      return @payload = default_payload unless post_without_body_or_get?
+
+      if resource_id
+        @payload = { id: resource_id }.to_json
+        @params[PAYLOAD_SIGNATURE_PARAM] = @payload
+      else
+        @payload = '{}'
+      end
+
+      @payload
+    end
+
+    def initialize_uri
+      @uri = URI.parse("#{@host}#{@path}").tap do |u|
+        u.query = URI.encode_www_form(@params) if @params.any?
       end
     end
 
