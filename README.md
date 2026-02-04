@@ -1,6 +1,6 @@
-# AccessGrid SDK
+# ![AccessGrid Logo](accessgrid.png)
 
-A Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
+AccessGrid is a Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
 
 ## Installation
 
