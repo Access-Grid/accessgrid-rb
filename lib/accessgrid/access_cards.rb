@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 # lib/accessgrid/access_cards.rb
 module AccessGrid
+  # Manages NFC key card lifecycle operations.
   class AccessCards
     def initialize(client)
       @client = client
@@ -9,7 +12,7 @@ module AccessGrid
       response = @client.make_request(:post, '/v1/key-cards', params)
       Card.new(response)
     end
-    
+
     # Alias provision to issue for backward compatibility
     alias provision issue
 
@@ -22,22 +25,13 @@ module AccessGrid
       response = @client.make_request(:patch, "/v1/key-cards/#{card_id}", params)
       Card.new(response)
     end
-    
+
     def list(template_id, state = nil)
       params = { template_id: template_id }
       params[:state] = state if state
-      
+
       response = @client.make_request(:get, '/v1/key-cards', nil, params)
       response.fetch('keys', []).map { |item| Card.new(item) }
-    end
-
-    private def manage_state(card_id, action)
-      response = @client.make_request(
-        :post, 
-        "/v1/key-cards/#{card_id}/#{action}", 
-        {}
-      )
-      Card.new(response)
     end
 
     def suspend(card_id)
@@ -51,12 +45,24 @@ module AccessGrid
     def unlink(card_id)
       manage_state(card_id, 'unlink')
     end
-    
+
     def delete(card_id)
       manage_state(card_id, 'delete')
     end
+
+    private
+
+    def manage_state(card_id, action)
+      response = @client.make_request(
+        :post,
+        "/v1/key-cards/#{card_id}/#{action}",
+        {}
+      )
+      Card.new(response)
+    end
   end
 
+  # Represents an NFC key card with its attributes and state.
   class Card
     attr_reader :id, :state, :url, :install_url, :details, :full_name,
                 :expiration_date, :card_template_id, :card_number, :site_code,
@@ -64,10 +70,11 @@ module AccessGrid
 
     def initialize(data)
       data ||= {}
+      install_url = data.fetch('install_url', nil)
       @id = data.fetch('id', nil)
       @state = data.fetch('state', nil)
-      @url = data.fetch('install_url', nil)
-      @install_url = data.fetch('install_url', nil)
+      @url = install_url
+      @install_url = install_url
       @details = data.fetch('details', nil)
       @full_name = data.fetch('full_name', nil)
       @expiration_date = data.fetch('expiration_date', nil)

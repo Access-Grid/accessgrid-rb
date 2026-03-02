@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 # lib/accessgrid/console.rb
 module AccessGrid
+  # Manages enterprise template and logging operations.
   class Console
     def initialize(client)
       @client = client
@@ -24,15 +27,13 @@ module AccessGrid
 
     def get_logs(template_id, params = {})
       response = @client.make_request(:get, "/v1/console/card-templates/#{template_id}/logs", nil, params)
-      
+
       # Return full response to match Python's behavior
-      if response['logs']
-        response['logs'] = response['logs'].map { |log| Event.new(log) }
-      end
-      
+      response['logs'] = response['logs'].map { |log| Event.new(log) } if response['logs']
+
       response
     end
-    
+
     # Keep event_log for backwards compatibility
     def event_log(params)
       template_id = params.delete(:card_template_id)
@@ -55,7 +56,7 @@ module AccessGrid
     def transform_template_params(params)
       design = params.delete(:design) || {}
       support_info = params.delete(:support_info) || {}
-      
+
       params.merge(
         background_color: design[:background_color],
         label_color: design[:label_color],
@@ -69,8 +70,9 @@ module AccessGrid
     end
   end
 
+  # Represents a card template configuration.
   class Template
-    attr_reader :id, :name, :platform, :protocol, :use_case, :created_at, 
+    attr_reader :id, :name, :platform, :protocol, :use_case, :created_at,
                 :last_published_at, :issued_keys_count, :active_keys_count,
                 :allowed_device_counts, :support_settings, :terms_settings, :style_settings
 
@@ -91,31 +93,37 @@ module AccessGrid
     end
   end
 
+  # Represents a template activity log event.
   class Event
     attr_reader :type, :timestamp, :user_id, :ip_address, :user_agent, :metadata
 
     def initialize(data)
+      metadata = data['metadata']
       @type = data['event']
       @timestamp = data['created_at']
-      @user_id = data['metadata']['user_id'] if data['metadata'] && data['metadata']['user_id']
+      @user_id = metadata['user_id'] if metadata && metadata['user_id']
       @ip_address = data['ip_address']
       @user_agent = data['user_agent']
-      @metadata = data['metadata']
+      @metadata = metadata
     end
   end
 
+  # Represents a paired iOS and Android template configuration.
   class PassTemplatePair
     attr_reader :id, :name, :created_at, :android_template, :ios_template
 
     def initialize(data)
+      android_template = data['android_template']
+      ios_template = data['ios_template']
       @id = data['id']
       @name = data['name']
       @created_at = data['created_at']
-      @android_template = data['android_template'] ? TemplateInfo.new(data['android_template']) : nil
-      @ios_template = data['ios_template'] ? TemplateInfo.new(data['ios_template']) : nil
+      @android_template = android_template ? TemplateInfo.new(android_template) : nil
+      @ios_template = ios_template ? TemplateInfo.new(ios_template) : nil
     end
   end
 
+  # Minimal template info used within PassTemplatePair.
   class TemplateInfo
     attr_reader :id, :name, :platform
 

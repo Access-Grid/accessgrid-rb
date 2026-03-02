@@ -1,6 +1,6 @@
-# AccessGrid SDK
+# ![AccessGrid Logo](accessgrid.png)
 
-A Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
+AccessGrid is a Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
 
 ## Installation
 
@@ -131,7 +131,6 @@ template = client.console.create_template(
   platform: "apple",
   use_case: "employee_badge",
   protocol: "desfire",
-  allow_on_multiple_devices: true,
   watch_count: 2,
   iphone_count: 3,
   design: {
@@ -159,7 +158,6 @@ template = client.console.update_template(
   "0xd3adb00b5",
   {
     name: "Updated Employee NFC key",
-    allow_on_multiple_devices: true,
     watch_count: 2,
     iphone_count: 3,
     support_info: {
