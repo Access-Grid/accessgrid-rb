@@ -51,6 +51,16 @@ module AccessGrid
       response
     end
 
+    def list_ledger_items(params = {})
+      response = @client.make_request(:get, '/v1/console/ledger-items', nil, params)
+
+      if response['ledger_items']
+        response['ledger_items'] = response['ledger_items'].map { |item| LedgerItem.new(item) }
+      end
+
+      response
+    end
+
     private
 
     def transform_template_params(params)
@@ -131,6 +141,47 @@ module AccessGrid
       @id = data['id']
       @name = data['name']
       @platform = data['platform']
+    end
+  end
+
+  # Represents a billing ledger item.
+  class LedgerItem
+    attr_reader :created_at, :amount, :id, :kind, :metadata, :access_pass
+
+    def initialize(data)
+      @created_at = data['created_at']
+      @amount = data['amount']
+      @id = data['ex_id']
+      @kind = data['kind']
+      @metadata = data['metadata']
+      @access_pass = data['access_pass'] ? LedgerItemAccessPass.new(data['access_pass']) : nil
+    end
+  end
+
+  # Represents an access pass reference within a ledger item.
+  class LedgerItemAccessPass
+    attr_reader :id, :full_name, :state, :metadata, :unified_access_pass_ex_id, :pass_template
+
+    def initialize(data)
+      @id = data['ex_id']
+      @full_name = data['full_name']
+      @state = data['state']
+      @metadata = data['metadata']
+      @unified_access_pass_ex_id = data['unified_access_pass_ex_id']
+      @pass_template = data['pass_template'] ? LedgerItemPassTemplate.new(data['pass_template']) : nil
+    end
+  end
+
+  # Represents a pass template reference within a ledger item's access pass.
+  class LedgerItemPassTemplate
+    attr_reader :id, :name, :protocol, :platform, :use_case
+
+    def initialize(data)
+      @id = data['ex_id']
+      @name = data['name']
+      @protocol = data['protocol']
+      @platform = data['platform']
+      @use_case = data['use_case']
     end
   end
 end
