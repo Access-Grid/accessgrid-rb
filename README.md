@@ -203,6 +203,20 @@ events = client.console.event_log(
 )
 ```
 
+#### List pass template pairs
+
+```ruby
+response = client.console.list_pass_template_pairs(page: 1, per_page: 20)
+
+response['pass_template_pairs'].each do |pair|
+  puts "#{pair.name} (#{pair.id})"
+  puts "  iOS: #{pair.ios_template&.name}"
+  puts "  Android: #{pair.android_template&.name}"
+end
+
+puts response['pagination'] # { "current_page" => 1, "total_pages" => 5, ... }
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
