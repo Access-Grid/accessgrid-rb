@@ -421,4 +421,209 @@ RSpec.describe AccessGrid::Console do
       expect(response['pass_template_pairs']).to be_nil
     end
   end
+
+  describe '#list_ledger_items' do
+    let(:ledger_response) do
+      {
+        ledger_items: [
+          {
+            created_at: '2025-06-15T14:30:00Z',
+            amount: -1.50,
+            ex_id: 'li_abc123',
+            kind: 'access_pass_debit',
+            metadata: {
+              access_pass_ex_id: 'ap_xyz',
+              pass_template_ex_id: 'pt_456'
+            },
+            access_pass: {
+              ex_id: 'ap_xyz',
+              full_name: 'Jane Doe',
+              state: 'active',
+              metadata: { department: 'Engineering' },
+              unified_access_pass_ex_id: 'uap_789',
+              pass_template: {
+                ex_id: 'pt_456',
+                name: 'Employee Badge',
+                protocol: 'desfire',
+                platform: 'apple',
+                use_case: 'employee_badge'
+              }
+            }
+          },
+          {
+            created_at: '2025-06-14T08:15:00Z',
+            amount: 500.00,
+            ex_id: 'li_def456',
+            kind: 'credit',
+            metadata: {},
+            access_pass: nil
+          }
+        ],
+        pagination: {
+          current_page: 1,
+          per_page: 50,
+          total_pages: 3,
+          total_count: 125
+        }
+      }
+    end
+
+    it 'returns ledger items with nested objects' do
+      stub_api_request(
+        :get,
+        '/v1/console/ledger-items',
+        body: ledger_response,
+        query: generate_sig_payload(id: :'ledger-items')
+      )
+
+      response = console.list_ledger_items
+
+      expect(response).to be_a(Hash)
+      expect(response['ledger_items']).to be_an(Array)
+      expect(response['ledger_items'].length).to eq(2)
+
+      item = response['ledger_items'].first
+      expect(item).to be_a(AccessGrid::LedgerItem)
+      expect(item.created_at).to eq('2025-06-15T14:30:00Z')
+      expect(item.amount).to eq(-1.50)
+      expect(item.id).to eq('li_abc123')
+      expect(item.kind).to eq('access_pass_debit')
+      expect(item.metadata).to eq({
+                                    'access_pass_ex_id' => 'ap_xyz',
+                                    'pass_template_ex_id' => 'pt_456'
+                                  })
+
+      ap = item.access_pass
+      expect(ap).to be_a(AccessGrid::LedgerItemAccessPass)
+      expect(ap.id).to eq('ap_xyz')
+      expect(ap.full_name).to eq('Jane Doe')
+      expect(ap.state).to eq('active')
+      expect(ap.metadata).to eq({ 'department' => 'Engineering' })
+      expect(ap.unified_access_pass_ex_id).to eq('uap_789')
+
+      pt = ap.pass_template
+      expect(pt).to be_a(AccessGrid::LedgerItemPassTemplate)
+      expect(pt.id).to eq('pt_456')
+      expect(pt.name).to eq('Employee Badge')
+      expect(pt.protocol).to eq('desfire')
+      expect(pt.platform).to eq('apple')
+      expect(pt.use_case).to eq('employee_badge')
+
+      expect(response['pagination']).to eq({
+                                             'current_page' => 1,
+                                             'per_page' => 50,
+                                             'total_pages' => 3,
+                                             'total_count' => 125
+                                           })
+    end
+
+    it 'accepts pagination and date filter params' do
+      query = {
+        page: 2,
+        per_page: 20,
+        start_date: '2025-01-01T00:00:00Z',
+        end_date: '2025-06-30T23:59:59Z'
+      }.merge(generate_sig_payload(id: :'ledger-items'))
+
+      stub_api_request(
+        :get,
+        '/v1/console/ledger-items',
+        body: ledger_response,
+        query: query
+      )
+
+      response = console.list_ledger_items(
+        page: 2,
+        per_page: 20,
+        start_date: '2025-01-01T00:00:00Z',
+        end_date: '2025-06-30T23:59:59Z'
+      )
+
+      expect(response['ledger_items']).to be_an(Array)
+    end
+
+    it 'handles null access_pass on a ledger item' do
+      null_ap_response = {
+        ledger_items: [
+          {
+            created_at: '2025-06-14T08:15:00Z',
+            amount: 500.00,
+            ex_id: 'li_credit',
+            kind: 'credit',
+            metadata: {},
+            access_pass: nil
+          }
+        ],
+        pagination: { current_page: 1, per_page: 50, total_pages: 1, total_count: 1 }
+      }
+
+      stub_api_request(
+        :get,
+        '/v1/console/ledger-items',
+        body: null_ap_response,
+        query: generate_sig_payload(id: :'ledger-items')
+      )
+
+      response = console.list_ledger_items
+
+      item = response['ledger_items'].first
+      expect(item.kind).to eq('credit')
+      expect(item.access_pass).to be_nil
+    end
+
+    it 'handles missing pass_template on an access_pass' do
+      missing_pt_response = {
+        ledger_items: [
+          {
+            created_at: '2025-06-15T14:30:00Z',
+            amount: -1.50,
+            ex_id: 'li_no_pt',
+            kind: 'access_pass_debit',
+            metadata: {},
+            access_pass: {
+              ex_id: 'ap_orphan',
+              full_name: 'John Smith',
+              state: 'suspended',
+              metadata: {},
+              unified_access_pass_ex_id: nil
+            }
+          }
+        ],
+        pagination: { current_page: 1, per_page: 50, total_pages: 1, total_count: 1 }
+      }
+
+      stub_api_request(
+        :get,
+        '/v1/console/ledger-items',
+        body: missing_pt_response,
+        query: generate_sig_payload(id: :'ledger-items')
+      )
+
+      response = console.list_ledger_items
+
+      ap = response['ledger_items'].first.access_pass
+      expect(ap).to be_a(AccessGrid::LedgerItemAccessPass)
+      expect(ap.full_name).to eq('John Smith')
+      expect(ap.unified_access_pass_ex_id).to be_nil
+      expect(ap.pass_template).to be_nil
+    end
+
+    it 'handles empty response' do
+      empty_response = {
+        ledger_items: [],
+        pagination: { current_page: 1, per_page: 50, total_pages: 0, total_count: 0 }
+      }
+
+      stub_api_request(
+        :get,
+        '/v1/console/ledger-items',
+        body: empty_response,
+        query: generate_sig_payload(id: :'ledger-items')
+      )
+
+      response = console.list_ledger_items
+
+      expect(response['ledger_items']).to eq([])
+    end
+  end
 end
