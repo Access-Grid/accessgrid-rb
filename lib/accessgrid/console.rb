@@ -151,7 +151,7 @@ module AccessGrid
     def initialize(data)
       @created_at = data['created_at']
       @amount = data['amount']
-      @id = data['ex_id']
+      @id = data['id']
       @kind = data['kind']
       @metadata = data['metadata']
       @access_pass = data['access_pass'] ? LedgerItemAccessPass.new(data['access_pass']) : nil
@@ -163,7 +163,7 @@ module AccessGrid
     attr_reader :id, :full_name, :state, :metadata, :unified_access_pass_ex_id, :pass_template
 
     def initialize(data)
-      @id = data['ex_id']
+      @id = data['id']
       @full_name = data['full_name']
       @state = data['state']
       @metadata = data['metadata']
@@ -177,7 +177,7 @@ module AccessGrid
     attr_reader :id, :name, :protocol, :platform, :use_case
 
     def initialize(data)
-      @id = data['ex_id']
+      @id = data['id']
       @name = data['name']
       @protocol = data['protocol']
       @platform = data['platform']
