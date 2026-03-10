@@ -429,20 +429,20 @@ RSpec.describe AccessGrid::Console do
           {
             created_at: '2025-06-15T14:30:00Z',
             amount: -1.50,
-            ex_id: 'li_abc123',
+            id: 'li_abc123',
             kind: 'access_pass_debit',
             metadata: {
               access_pass_ex_id: 'ap_xyz',
               pass_template_ex_id: 'pt_456'
             },
             access_pass: {
-              ex_id: 'ap_xyz',
+              id: 'ap_xyz',
               full_name: 'Jane Doe',
               state: 'active',
               metadata: { department: 'Engineering' },
               unified_access_pass_ex_id: 'uap_789',
               pass_template: {
-                ex_id: 'pt_456',
+                id: 'pt_456',
                 name: 'Employee Badge',
                 protocol: 'desfire',
                 platform: 'apple',
@@ -453,7 +453,7 @@ RSpec.describe AccessGrid::Console do
           {
             created_at: '2025-06-14T08:15:00Z',
             amount: 500.00,
-            ex_id: 'li_def456',
+            id: 'li_def456',
             kind: 'credit',
             metadata: {},
             access_pass: nil
@@ -548,7 +548,7 @@ RSpec.describe AccessGrid::Console do
           {
             created_at: '2025-06-14T08:15:00Z',
             amount: 500.00,
-            ex_id: 'li_credit',
+            id: 'li_credit',
             kind: 'credit',
             metadata: {},
             access_pass: nil
@@ -577,11 +577,11 @@ RSpec.describe AccessGrid::Console do
           {
             created_at: '2025-06-15T14:30:00Z',
             amount: -1.50,
-            ex_id: 'li_no_pt',
+            id: 'li_no_pt',
             kind: 'access_pass_debit',
             metadata: {},
             access_pass: {
-              ex_id: 'ap_orphan',
+              id: 'ap_orphan',
               full_name: 'John Smith',
               state: 'suspended',
               metadata: {},
