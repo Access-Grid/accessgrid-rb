@@ -1,0 +1,56 @@
+AllCops:
+  SuggestExtensions: false
+  NewCops: enable
+
+Gemspec/DevelopmentDependencies:
+  Enabled: true
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: true
+  AllowedMethods:
+    - initialize
+
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/ClassLength:
+  Enabled: true
+  Max: 125
+  CountComments: false
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Metrics/MethodLength:
+  Enabled: true
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+  Exclude:
+    - 'spec/**/*'
+  AllowedMethods:
+    - initialize
+
+Metrics/ParameterLists:
+  Enabled: true
+  Max: 5
+  Exclude:
+    - 'spec/**/*'
+
+Naming/VariableNumber:
+  Enabled: true
+  EnforcedStyle: snake_case
+  CheckMethodNames: true
+  CheckSymbols: true
+
+Style/Documentation:
+  Enabled: false

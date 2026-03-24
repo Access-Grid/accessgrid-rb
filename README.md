@@ -1,6 +1,6 @@
-# AccessGrid SDK
+# ![AccessGrid Logo](accessgrid.png)
 
-A Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
+AccessGrid is a Ruby SDK for interacting with the [AccessGrid.com](https://www.accessgrid.com) API. This SDK provides a simple interface for managing NFC key cards and enterprise templates. Full docs at https://www.accessgrid.com/docs
 
 ## Installation
 
@@ -131,7 +131,6 @@ template = client.console.create_template(
   platform: "apple",
   use_case: "employee_badge",
   protocol: "desfire",
-  allow_on_multiple_devices: true,
   watch_count: 2,
   iphone_count: 3,
   design: {
@@ -159,7 +158,6 @@ template = client.console.update_template(
   "0xd3adb00b5",
   {
     name: "Updated Employee NFC key",
-    allow_on_multiple_devices: true,
     watch_count: 2,
     iphone_count: 3,
     support_info: {
@@ -203,6 +201,44 @@ events = client.console.event_log(
     event_type: "install"
   }
 )
+```
+
+#### List pass template pairs
+
+```ruby
+response = client.console.list_pass_template_pairs(page: 1, per_page: 20)
+
+response['pass_template_pairs'].each do |pair|
+  puts "#{pair.name} (#{pair.id})"
+  puts "  iOS: #{pair.ios_template&.name}"
+  puts "  Android: #{pair.android_template&.name}"
+end
+
+puts response['pagination'] # { "current_page" => 1, "total_pages" => 5, ... }
+```
+
+#### List ledger items
+
+```ruby
+response = client.console.list_ledger_items(
+  page: 1,
+  per_page: 50,
+  start_date: '2025-01-01T00:00:00Z',
+  end_date: '2025-06-30T23:59:59Z'
+)
+
+response['ledger_items'].each do |item|
+  puts "#{item.kind}: #{item.amount} (#{item.created_at})"
+
+  if item.access_pass
+    puts "  Pass: #{item.access_pass.full_name} (#{item.access_pass.state})"
+    if item.access_pass.pass_template
+      puts "  Template: #{item.access_pass.pass_template.name}"
+    end
+  end
+end
+
+puts response['pagination'] # { "current_page" => 1, "total_pages" => 3, ... }
 ```
 
 ## Configuration

@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 # accessgrid.gemspec
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'accessgrid/version'
 
@@ -14,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.6.0'
 
-  spec.metadata      = { "source_code_uri" => "https://github.com/access-grid/accessgrid-rb" }
+  spec.metadata      = { 'source_code_uri' => 'https://github.com/access-grid/accessgrid-rb' }
 
   # Specify which files should be added to the gem when it is released
   spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE', 'CHANGELOG.md']
@@ -22,8 +24,5 @@ Gem::Specification.new do |spec|
   spec.executables   = []
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler', '~> 2.0'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'webmock', '~> 3.0'
+  spec.add_dependency 'base64'
 end
