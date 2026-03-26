@@ -276,7 +276,7 @@ end
 
 ## Requirements
 
-- Ruby 2.6 or higher
+- Ruby 2.19 or higher
 
 ## Security
 

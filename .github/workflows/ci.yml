@@ -67,7 +67,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby: ['4.0', '3.4', '2.7', '2.6']
+        ruby: ['4.0', '3.4', '2.7', '2.19']
 
     steps:
       - name: Checkout code
