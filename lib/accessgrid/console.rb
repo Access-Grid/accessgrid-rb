@@ -64,19 +64,14 @@ module AccessGrid
     private
 
     def transform_template_params(params)
-      design = params.delete(:design) || {}
-      support_info = params.delete(:support_info) || {}
+      design = params.delete(:design)
+      support_info = params.delete(:support_info)
 
-      params.merge(
-        background_color: design[:background_color],
-        label_color: design[:label_color],
-        label_secondary_color: design[:label_secondary_color],
-        support_url: support_info[:support_url],
-        support_phone_number: support_info[:support_phone_number],
-        support_email: support_info[:support_email],
-        privacy_policy_url: support_info[:privacy_policy_url],
-        terms_and_conditions_url: support_info[:terms_and_conditions_url]
-      )
+      # Only merge nested keys if they were provided (backward compat)
+      params.merge!(design) if design
+      params.merge!(support_info) if support_info
+
+      params
     end
   end
 

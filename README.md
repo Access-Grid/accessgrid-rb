@@ -127,26 +127,24 @@ client.access_cards.delete("0xc4rd1d")
 
 ```ruby
 template = client.console.create_template(
-  name: "Employee NFC key",
+  name: "Employee Access Pass",
   platform: "apple",
   use_case: "employee_badge",
   protocol: "desfire",
+  allow_on_multiple_devices: true,
   watch_count: 2,
   iphone_count: 3,
-  design: {
-    background_color: "#FFFFFF",
-    label_color: "#000000",
-    label_secondary_color: "#333333",
-    background_image: "[image_in_base64_encoded_format]",
-    logo_image: "[image_in_base64_encoded_format]",
-    icon_image: "[image_in_base64_encoded_format]"
-  },
-  support_info: {
-    support_url: "https://help.yourcompany.com",
-    support_phone_number: "+1-555-123-4567",
-    support_email: "support@yourcompany.com",
-    privacy_policy_url: "https://yourcompany.com/privacy",
-    terms_and_conditions_url: "https://yourcompany.com/terms"
+  background_color: "#FFFFFF",
+  label_color: "#000000",
+  label_secondary_color: "#333333",
+  support_url: "https://help.yourcompany.com",
+  support_phone_number: "+1-555-123-4567",
+  support_email: "support@yourcompany.com",
+  privacy_policy_url: "https://yourcompany.com/privacy",
+  terms_and_conditions_url: "https://yourcompany.com/terms",
+  metadata: {
+    version: "2.1",
+    approval_status: "approved"
   }
 )
 ```

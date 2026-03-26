@@ -88,22 +88,24 @@ RSpec.describe AccessGrid::Console do
       expect { console.create_template(template_params) }.not_to raise_error
     end
 
-    it 'handles missing design and support_info' do
-      minimal_params = { name: 'Minimal Template', platform: 'apple' }
-      minimal_request_body = {
-        name: 'Minimal Template',
+    it 'handles flat params without nested design/support_info' do
+      flat_params = {
+        name: 'Flat Template',
         platform: 'apple',
-        background_color: nil,
-        label_color: nil,
-        label_secondary_color: nil,
-        support_url: nil,
-        support_email: nil,
-        support_phone_number: nil,
-        privacy_policy_url: nil,
-        terms_and_conditions_url: nil
+        background_color: '#FFFFFF',
+        support_url: 'https://help.example.com'
       }
 
-      stub_api_request(:post, '/v1/console/card-templates', body: success_response, request_body: minimal_request_body)
+      stub_api_request(:post, '/v1/console/card-templates', body: success_response, request_body: flat_params)
+
+      template = console.create_template(flat_params)
+      expect(template).to be_a(AccessGrid::Template)
+    end
+
+    it 'handles minimal params' do
+      minimal_params = { name: 'Minimal Template', platform: 'apple' }
+
+      stub_api_request(:post, '/v1/console/card-templates', body: success_response, request_body: minimal_params)
 
       template = console.create_template(minimal_params)
       expect(template).to be_a(AccessGrid::Template)
@@ -125,14 +127,7 @@ RSpec.describe AccessGrid::Console do
       {
         name: 'Updated Badge',
         watch_count: 3,
-        background_color: nil,
-        label_color: nil,
-        label_secondary_color: nil,
-        support_url: nil,
-        support_email: 'new-support@example.com',
-        support_phone_number: nil,
-        privacy_policy_url: nil,
-        terms_and_conditions_url: nil
+        support_email: 'new-support@example.com'
       }
     end
 
