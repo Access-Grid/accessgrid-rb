@@ -63,6 +63,12 @@ module AccessGrid
 
     alias ledger_items list_ledger_items
 
+    def ios_preflight(card_template_id:, access_pass_ex_id:)
+      data = { access_pass_ex_id: access_pass_ex_id }
+      response = @client.make_request(:post, "/v1/console/card-templates/#{card_template_id}/ios_preflight", data)
+      IosPreflight.new(response)
+    end
+
     private
 
     def transform_template_params(params)
@@ -138,6 +144,19 @@ module AccessGrid
       @id = data['id']
       @name = data['name']
       @platform = data['platform']
+    end
+  end
+
+  # Represents an iOS In-App Provisioning preflight response.
+  class IosPreflight
+    attr_reader :provisioningCredentialIdentifier, :sharingInstanceIdentifier,
+                :cardTemplateIdentifier, :environmentIdentifier
+
+    def initialize(data)
+      @provisioningCredentialIdentifier = data['provisioningCredentialIdentifier']
+      @sharingInstanceIdentifier = data['sharingInstanceIdentifier']
+      @cardTemplateIdentifier = data['cardTemplateIdentifier']
+      @environmentIdentifier = data['environmentIdentifier']
     end
   end
 
