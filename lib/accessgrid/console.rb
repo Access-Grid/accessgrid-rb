@@ -4,8 +4,11 @@
 module AccessGrid
   # Manages enterprise template and logging operations.
   class Console
+    attr_reader :webhooks
+
     def initialize(client)
       @client = client
+      @webhooks = Webhooks.new(client)
     end
 
     def create_template(params)
@@ -198,6 +201,51 @@ module AccessGrid
       @protocol = data['protocol']
       @platform = data['platform']
       @use_case = data['use_case']
+    end
+  end
+
+  # Manages webhook operations.
+  class Webhooks
+    def initialize(client)
+      @client = client
+    end
+
+    def create(name:, url:, subscribed_events:, auth_method: 'bearer_token')
+      data = {
+        name: name,
+        url: url,
+        subscribed_events: subscribed_events,
+        auth_method: auth_method
+      }
+      response = @client.make_request(:post, '/v1/console/webhooks', data)
+      Webhook.new(response)
+    end
+
+    def list(**params)
+      response = @client.make_request(:get, '/v1/console/webhooks', nil, params)
+      (response['webhooks'] || []).map { |wh| Webhook.new(wh) }
+    end
+
+    def delete(webhook_id)
+      @client.make_request(:delete, "/v1/console/webhooks/#{webhook_id}")
+    end
+  end
+
+  # Represents a webhook configuration.
+  class Webhook
+    attr_reader :id, :name, :url, :auth_method, :subscribed_events,
+                :created_at, :private_key, :client_cert, :cert_expires_at
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @url = data['url']
+      @auth_method = data['auth_method']
+      @subscribed_events = data['subscribed_events']
+      @created_at = data['created_at']
+      @private_key = data['private_key']
+      @client_cert = data['client_cert']
+      @cert_expires_at = data['cert_expires_at']
     end
   end
 end

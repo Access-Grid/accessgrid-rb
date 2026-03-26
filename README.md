@@ -253,6 +253,37 @@ puts "Card Template ID: #{response.card_template_identifier}"
 puts "Environment ID: #{response.environment_identifier}"
 ```
 
+### Webhooks
+
+#### Create a webhook
+
+```ruby
+webhook = client.console.webhooks.create(
+  name: 'Production',
+  url: 'https://example.com/webhooks',
+  subscribed_events: ['ag.access_pass.issued']
+)
+
+puts "Webhook created: #{webhook.id}"
+puts "Private key: #{webhook.private_key}"
+```
+
+#### List webhooks
+
+```ruby
+webhooks = client.console.webhooks.list
+
+webhooks.each do |webhook|
+  puts "ID: #{webhook.id}, Name: #{webhook.name}"
+end
+```
+
+#### Delete a webhook
+
+```ruby
+client.console.webhooks.delete('abc123')
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -329,9 +360,9 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
-| GET /v1/console/webhooks | `console.webhooks.list()` | - |
-| POST /v1/console/webhooks | `console.webhooks.create()` | - |
-| DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | - |
+| GET /v1/console/webhooks | `console.webhooks.list()` | Y |
+| POST /v1/console/webhooks | `console.webhooks.create()` | Y |
+| DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | Y |
 | POST /v1/console/hid/orgs | `console.hid.orgs.create()` | - |
 | POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | - |
 | GET /v1/console/hid/orgs | `console.hid.orgs.list()` | - |
