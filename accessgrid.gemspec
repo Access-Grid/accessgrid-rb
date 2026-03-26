@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'A Ruby client for the AccessGrid API'
   spec.homepage      = 'https://github.com/access-grid/accessgrid-rb'
   spec.license       = 'MIT'
-  spec.required_ruby_version = '>= 2.19.2'
+  spec.required_ruby_version = '>= 3.0'
 
   spec.metadata      = { 'source_code_uri' => 'https://github.com/access-grid/accessgrid-rb' }
 
