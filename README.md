@@ -314,7 +314,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
 | GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | - |
-| GET /v1/console/ledger-items | `console.list_ledger_items()` | Y |
+| GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | - |
 | POST /v1/console/webhooks | `console.webhooks.create()` | - |
 | DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | - |
