@@ -63,6 +63,7 @@ module AccessGrid
 
     def handle_response(response)
       case response.code.to_i
+      when 204 then {}
       when 200, 201, 202 then JSON.parse(response.body)
       when 401 then raise AuthenticationError, 'Invalid credentials'
       when 402 then raise Error, 'Insufficient account balance'

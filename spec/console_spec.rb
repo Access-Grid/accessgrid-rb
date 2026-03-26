@@ -658,4 +658,90 @@ RSpec.describe AccessGrid::Console do
       expect(result.environment_identifier).to eq('env_abc')
     end
   end
+
+  describe '#webhooks' do
+    let(:webhooks_service) { console.webhooks }
+
+    describe '#create' do
+      let(:create_response) do
+        {
+          id: 'wh_123',
+          name: 'Production',
+          url: 'https://example.com/webhooks',
+          auth_method: 'bearer_token',
+          subscribed_events: ['ag.access_pass.issued'],
+          created_at: '2025-01-01T00:00:00Z',
+          private_key: 'pk_secret_123'
+        }
+      end
+
+      it 'creates a webhook' do
+        stub_api_request(
+          :post,
+          '/v1/console/webhooks',
+          body: create_response,
+          request_body: {
+            name: 'Production',
+            url: 'https://example.com/webhooks',
+            subscribed_events: ['ag.access_pass.issued'],
+            auth_method: 'bearer_token'
+          }
+        )
+
+        webhook = webhooks_service.create(
+          name: 'Production',
+          url: 'https://example.com/webhooks',
+          subscribed_events: ['ag.access_pass.issued']
+        )
+
+        expect(webhook).to be_a(AccessGrid::Webhook)
+        expect(webhook.id).to eq('wh_123')
+        expect(webhook.name).to eq('Production')
+        expect(webhook.private_key).to eq('pk_secret_123')
+      end
+    end
+
+    describe '#list' do
+      let(:list_response) do
+        {
+          webhooks: [
+            { id: 'wh_1', name: 'Prod', url: 'https://example.com/wh1', auth_method: 'bearer_token' },
+            { id: 'wh_2', name: 'Staging', url: 'https://example.com/wh2', auth_method: 'bearer_token' }
+          ],
+          pagination: { current_page: 1, total_pages: 1 }
+        }
+      end
+
+      it 'lists webhooks' do
+        stub_api_request(
+          :get,
+          '/v1/console/webhooks',
+          body: list_response,
+          query: generate_sig_payload(id: :webhooks)
+        )
+
+        webhooks = webhooks_service.list
+
+        expect(webhooks).to be_an(Array)
+        expect(webhooks.length).to eq(2)
+        expect(webhooks.first).to be_a(AccessGrid::Webhook)
+        expect(webhooks.first.id).to eq('wh_1')
+      end
+    end
+
+    describe '#delete' do
+      it 'deletes a webhook' do
+        stub_api_request(
+          :delete,
+          '/v1/console/webhooks/wh_123',
+          status: 204,
+          body: {},
+          query: generate_sig_payload(id: :wh_123)
+        )
+
+        result = webhooks_service.delete('wh_123')
+        expect(result).to eq({})
+      end
+    end
+  end
 end

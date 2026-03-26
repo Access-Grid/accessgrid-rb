@@ -42,10 +42,11 @@ module AccessGrid
     def generate_net_http_request!
       klass =
         case http_method
-        when :get   then  Net::HTTP::Get
-        when :post  then  Net::HTTP::Post
-        when :put   then  Net::HTTP::Put
-        when :patch then  Net::HTTP::Patch
+        when :get    then Net::HTTP::Get
+        when :post   then Net::HTTP::Post
+        when :put    then Net::HTTP::Put
+        when :patch  then Net::HTTP::Patch
+        when :delete then Net::HTTP::Delete
         else
           raise ArgumentError, "Unsupported HTTP method: #{http_method}"
         end
@@ -89,6 +90,10 @@ module AccessGrid
       http_method == :get
     end
 
+    def delete?
+      http_method == :delete
+    end
+
     def post?
       http_method == :post
     end
@@ -98,7 +103,7 @@ module AccessGrid
     end
 
     def post_without_body_or_get?
-      get? || (post? && empty_body?)
+      get? || delete? || (post? && empty_body?)
     end
 
     def default_payload
