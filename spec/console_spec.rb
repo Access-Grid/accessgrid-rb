@@ -652,10 +652,10 @@ RSpec.describe AccessGrid::Console do
       )
 
       expect(result).to be_a(AccessGrid::IosPreflight)
-      expect(result.provisioningCredentialIdentifier).to eq('prov_cred_123')
-      expect(result.sharingInstanceIdentifier).to eq('share_inst_456')
-      expect(result.cardTemplateIdentifier).to eq('card_tmpl_789')
-      expect(result.environmentIdentifier).to eq('env_abc')
+      expect(result.provisioning_credential_identifier).to eq('prov_cred_123')
+      expect(result.sharing_instance_identifier).to eq('share_inst_456')
+      expect(result.card_template_identifier).to eq('card_tmpl_789')
+      expect(result.environment_identifier).to eq('env_abc')
     end
   end
 end

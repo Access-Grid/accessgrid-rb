@@ -149,14 +149,14 @@ module AccessGrid
 
   # Represents an iOS In-App Provisioning preflight response.
   class IosPreflight
-    attr_reader :provisioningCredentialIdentifier, :sharingInstanceIdentifier,
-                :cardTemplateIdentifier, :environmentIdentifier
+    attr_reader :provisioning_credential_identifier, :sharing_instance_identifier,
+                :card_template_identifier, :environment_identifier
 
     def initialize(data)
-      @provisioningCredentialIdentifier = data['provisioningCredentialIdentifier']
-      @sharingInstanceIdentifier = data['sharingInstanceIdentifier']
-      @cardTemplateIdentifier = data['cardTemplateIdentifier']
-      @environmentIdentifier = data['environmentIdentifier']
+      @provisioning_credential_identifier = data['provisioningCredentialIdentifier']
+      @sharing_instance_identifier = data['sharingInstanceIdentifier']
+      @card_template_identifier = data['cardTemplateIdentifier']
+      @environment_identifier = data['environmentIdentifier']
     end
   end
 

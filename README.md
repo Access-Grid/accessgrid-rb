@@ -247,10 +247,10 @@ response = client.console.ios_preflight(
   access_pass_ex_id: "0xp455-3x1d"
 )
 
-puts "Provisioning Credential ID: #{response.provisioningCredentialIdentifier}"
-puts "Sharing Instance ID: #{response.sharingInstanceIdentifier}"
-puts "Card Template ID: #{response.cardTemplateIdentifier}"
-puts "Environment ID: #{response.environmentIdentifier}"
+puts "Provisioning Credential ID: #{response.provisioning_credential_identifier}"
+puts "Sharing Instance ID: #{response.sharing_instance_identifier}"
+puts "Card Template ID: #{response.card_template_identifier}"
+puts "Environment ID: #{response.environment_identifier}"
 ```
 
 ## Configuration
