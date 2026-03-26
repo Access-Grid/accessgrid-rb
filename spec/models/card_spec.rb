@@ -22,7 +22,8 @@ RSpec.describe AccessGrid::Card do
             { 'type' => 'iphone', 'id' => 'dev_1' },
             { 'type' => 'watch', 'id' => 'dev_2' }
           ],
-          'metadata' => { 'department' => 'Sales', 'badge_id' => 'B001' }
+          'metadata' => { 'department' => 'Sales', 'badge_id' => 'B001' },
+          'temporary' => true
         }
       end
 
@@ -86,6 +87,10 @@ RSpec.describe AccessGrid::Card do
       it 'sets metadata' do
         expect(card.metadata).to eq({ 'department' => 'Sales', 'badge_id' => 'B001' })
       end
+
+      it 'sets temporary' do
+        expect(card.temporary).to eq(true)
+      end
     end
 
     context 'with minimal data' do
@@ -108,6 +113,7 @@ RSpec.describe AccessGrid::Card do
         expect(card.file_data).to be_nil
         expect(card.direct_install_url).to be_nil
         expect(card.details).to be_nil
+        expect(card.temporary).to be_nil
       end
 
       it 'defaults devices to empty array' do
