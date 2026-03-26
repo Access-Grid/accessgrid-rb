@@ -296,6 +296,32 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/access-grid/accessgrid-rb.
 
+## Feature Matrix
+
+| Endpoint | Method | Supported |
+|---|---|:---:|
+| POST /v1/key-cards | `access_cards.issue()` | Y |
+| GET /v1/key-cards/{id} | `access_cards.get()` | Y |
+| PATCH /v1/key-cards/{id} | `access_cards.update()` | Y |
+| GET /v1/key-cards | `access_cards.list()` | Y |
+| POST /v1/key-cards/{id}/suspend | `access_cards.suspend()` | Y |
+| POST /v1/key-cards/{id}/resume | `access_cards.resume()` | Y |
+| POST /v1/key-cards/{id}/unlink | `access_cards.unlink()` | Y |
+| POST /v1/key-cards/{id}/delete | `access_cards.delete()` | Y |
+| POST /v1/console/card-templates | `console.create_template()` | Y |
+| PUT /v1/console/card-templates/{id} | `console.update_template()` | Y |
+| GET /v1/console/card-templates/{id} | `console.read_template()` | Y |
+| GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
+| GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
+| POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | - |
+| GET /v1/console/ledger-items | `console.list_ledger_items()` | Y |
+| GET /v1/console/webhooks | `console.webhooks.list()` | - |
+| POST /v1/console/webhooks | `console.webhooks.create()` | - |
+| DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | - |
+| POST /v1/console/hid/orgs | `console.hid.orgs.create()` | - |
+| POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | - |
+| GET /v1/console/hid/orgs | `console.hid.orgs.list()` | - |
+
 ## License
 
 The gem is available as open source under the terms of the MIT License.
