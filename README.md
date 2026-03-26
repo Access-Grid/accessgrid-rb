@@ -284,6 +284,45 @@ end
 client.console.webhooks.delete('abc123')
 ```
 
+### HID Organizations
+
+#### Create an HID org
+
+```ruby
+org = client.console.hid.orgs.create(
+  name: 'My Org',
+  full_address: '1 Main St, NY NY',
+  phone: '+1-555-0000',
+  first_name: 'Ada',
+  last_name: 'Lovelace'
+)
+
+puts "Created org: #{org.name} (ID: #{org.id})"
+puts "Slug: #{org.slug}"
+```
+
+#### List HID orgs
+
+```ruby
+orgs = client.console.hid.orgs.list
+
+orgs.each do |org|
+  puts "Org ID: #{org.id}, Name: #{org.name}, Slug: #{org.slug}"
+end
+```
+
+#### Activate an HID org
+
+```ruby
+result = client.console.hid.orgs.activate(
+  email: 'admin@example.com',
+  password: 'hid-password-123'
+)
+
+puts "Completed registration for org: #{result.name}"
+puts "Status: #{result.status}"
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -363,9 +402,9 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |
 | POST /v1/console/webhooks | `console.webhooks.create()` | Y |
 | DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | Y |
-| POST /v1/console/hid/orgs | `console.hid.orgs.create()` | - |
-| POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | - |
-| GET /v1/console/hid/orgs | `console.hid.orgs.list()` | - |
+| POST /v1/console/hid/orgs | `console.hid.orgs.create()` | Y |
+| POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | Y |
+| GET /v1/console/hid/orgs | `console.hid.orgs.list()` | Y |
 
 ## License
 

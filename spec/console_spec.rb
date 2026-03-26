@@ -744,4 +744,105 @@ RSpec.describe AccessGrid::Console do
       end
     end
   end
+
+  describe 'HID orgs' do
+    let(:org_response) do
+      {
+        id: 'org_123',
+        name: 'My Org',
+        slug: 'my-org',
+        first_name: 'Ada',
+        last_name: 'Lovelace',
+        phone: '+1-555-0000',
+        full_address: '1 Main St, NY NY',
+        status: 'pending',
+        created_at: '2025-01-01T00:00:00Z'
+      }
+    end
+
+    describe '#hid.orgs.create' do
+      it 'creates a new HID org' do
+        request_body = {
+          name: 'My Org',
+          full_address: '1 Main St, NY NY',
+          phone: '+1-555-0000',
+          first_name: 'Ada',
+          last_name: 'Lovelace'
+        }
+
+        stub_api_request(:post, '/v1/console/hid/orgs', body: org_response, request_body: request_body)
+
+        org = console.hid.orgs.create(
+          name: 'My Org',
+          full_address: '1 Main St, NY NY',
+          phone: '+1-555-0000',
+          first_name: 'Ada',
+          last_name: 'Lovelace'
+        )
+
+        expect(org).to be_a(AccessGrid::HidOrg)
+        expect(org.id).to eq('org_123')
+        expect(org.name).to eq('My Org')
+        expect(org.slug).to eq('my-org')
+        expect(org.first_name).to eq('Ada')
+        expect(org.last_name).to eq('Lovelace')
+        expect(org.phone).to eq('+1-555-0000')
+        expect(org.full_address).to eq('1 Main St, NY NY')
+        expect(org.status).to eq('pending')
+        expect(org.created_at).to eq('2025-01-01T00:00:00Z')
+      end
+    end
+
+    describe '#hid.orgs.list' do
+      it 'returns a list of HID orgs' do
+        list_response = [org_response, org_response.merge(id: 'org_456', name: 'Other Org', slug: 'other-org')]
+
+        stub_api_request(
+          :get,
+          '/v1/console/hid/orgs',
+          body: list_response,
+          query: generate_sig_payload(id: :orgs)
+        )
+
+        orgs = console.hid.orgs.list
+
+        expect(orgs).to be_an(Array)
+        expect(orgs.length).to eq(2)
+        expect(orgs.first).to be_a(AccessGrid::HidOrg)
+        expect(orgs.first.id).to eq('org_123')
+        expect(orgs.last.id).to eq('org_456')
+      end
+
+      it 'returns empty array when no orgs' do
+        stub_api_request(
+          :get,
+          '/v1/console/hid/orgs',
+          body: [],
+          query: generate_sig_payload(id: :orgs)
+        )
+
+        orgs = console.hid.orgs.list
+
+        expect(orgs).to eq([])
+      end
+    end
+
+    describe '#hid.orgs.activate' do
+      it 'activates an HID org with credentials' do
+        activated_response = org_response.merge(status: 'active')
+        request_body = { email: 'admin@example.com', password: 'hid-password-123' }
+
+        stub_api_request(:post, '/v1/console/hid/orgs/activate', body: activated_response, request_body: request_body)
+
+        org = console.hid.orgs.activate(
+          email: 'admin@example.com',
+          password: 'hid-password-123'
+        )
+
+        expect(org).to be_a(AccessGrid::HidOrg)
+        expect(org.status).to eq('active')
+        expect(org.name).to eq('My Org')
+      end
+    end
+  end
 end
