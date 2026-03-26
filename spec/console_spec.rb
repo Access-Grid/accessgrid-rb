@@ -627,4 +627,35 @@ RSpec.describe AccessGrid::Console do
       expect(console.method(:ledger_items)).to eq(console.method(:list_ledger_items))
     end
   end
+
+  describe '#ios_preflight' do
+    let(:preflight_response) do
+      {
+        provisioningCredentialIdentifier: 'prov_cred_123',
+        sharingInstanceIdentifier: 'share_inst_456',
+        cardTemplateIdentifier: 'card_tmpl_789',
+        environmentIdentifier: 'env_abc'
+      }
+    end
+
+    it 'returns an IosPreflight object' do
+      stub_api_request(
+        :post,
+        '/v1/console/card-templates/tmpl_123/ios_preflight',
+        body: preflight_response,
+        request_body: { access_pass_ex_id: 'pass_456' }
+      )
+
+      result = console.ios_preflight(
+        card_template_id: 'tmpl_123',
+        access_pass_ex_id: 'pass_456'
+      )
+
+      expect(result).to be_a(AccessGrid::IosPreflight)
+      expect(result.provisioning_credential_identifier).to eq('prov_cred_123')
+      expect(result.sharing_instance_identifier).to eq('share_inst_456')
+      expect(result.card_template_identifier).to eq('card_tmpl_789')
+      expect(result.environment_identifier).to eq('env_abc')
+    end
+  end
 end

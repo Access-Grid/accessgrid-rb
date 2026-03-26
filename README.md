@@ -239,6 +239,20 @@ end
 puts response['pagination'] # { "current_page" => 1, "total_pages" => 3, ... }
 ```
 
+#### iOS In-App Provisioning Preflight
+
+```ruby
+response = client.console.ios_preflight(
+  card_template_id: "0xt3mp14t3-3x1d",
+  access_pass_ex_id: "0xp455-3x1d"
+)
+
+puts "Provisioning Credential ID: #{response.provisioning_credential_identifier}"
+puts "Sharing Instance ID: #{response.sharing_instance_identifier}"
+puts "Card Template ID: #{response.card_template_identifier}"
+puts "Environment ID: #{response.environment_identifier}"
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -313,7 +327,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/card-templates/{id} | `console.read_template()` | Y |
 | GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
 | GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
-| POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | - |
+| POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | - |
 | POST /v1/console/webhooks | `console.webhooks.create()` | - |
