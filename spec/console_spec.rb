@@ -621,4 +621,10 @@ RSpec.describe AccessGrid::Console do
       expect(response['ledger_items']).to eq([])
     end
   end
+
+  describe '#ledger_items' do
+    it 'is an alias for list_ledger_items' do
+      expect(console.method(:ledger_items)).to eq(console.method(:list_ledger_items))
+    end
+  end
 end
