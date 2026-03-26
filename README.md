@@ -153,18 +153,22 @@ template = client.console.create_template(
 
 ```ruby
 template = client.console.update_template(
-  "0xd3adb00b5",
-  {
-    name: "Updated Employee NFC key",
-    watch_count: 2,
-    iphone_count: 3,
-    support_info: {
-      support_url: "https://help.yourcompany.com",
-      support_phone_number: "+1-555-123-4567",
-      support_email: "support@yourcompany.com",
-      privacy_policy_url: "https://yourcompany.com/privacy",
-      terms_and_conditions_url: "https://yourcompany.com/terms"
-    }
+  card_template_id: "0xd3adb00b5",
+  name: "Updated Employee Access Pass",
+  allow_on_multiple_devices: true,
+  watch_count: 2,
+  iphone_count: 3,
+  background_color: "#FFFFFF",
+  label_color: "#000000",
+  label_secondary_color: "#333333",
+  support_url: "https://help.yourcompany.com",
+  support_phone_number: "+1-555-123-4567",
+  support_email: "support@yourcompany.com",
+  privacy_policy_url: "https://yourcompany.com/privacy",
+  terms_and_conditions_url: "https://yourcompany.com/terms",
+  metadata: {
+    version: "2.2",
+    last_updated_by: "admin"
   }
 )
 ```

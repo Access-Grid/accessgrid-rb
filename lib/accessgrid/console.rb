@@ -14,7 +14,13 @@ module AccessGrid
       Template.new(response)
     end
 
-    def update_template(template_id, params)
+    def update_template(template_id = nil, params = {}, **kwargs)
+      # Support keyword-style: update_template(card_template_id: "id", name: ...)
+      if template_id.nil? && kwargs.any?
+        template_id = kwargs.delete(:card_template_id)
+        params = kwargs
+      end
+
       transformed_params = transform_template_params(params)
       response = @client.make_request(:put, "/v1/console/card-templates/#{template_id}", transformed_params)
       Template.new(response)

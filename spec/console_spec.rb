@@ -140,7 +140,7 @@ RSpec.describe AccessGrid::Console do
       }
     end
 
-    it 'updates an existing template' do
+    it 'updates an existing template with positional args' do
       stub_api_request(:put, '/v1/console/card-templates/template_123', body: success_response,
                                                                         request_body: expected_request_body)
 
@@ -149,6 +149,22 @@ RSpec.describe AccessGrid::Console do
       expect(template).to be_a(AccessGrid::Template)
       expect(template.id).to eq('template_123')
       expect(template.name).to eq('Updated Badge')
+    end
+
+    it 'updates an existing template with keyword args' do
+      keyword_request_body = { name: 'Updated Badge', watch_count: 3 }
+
+      stub_api_request(:put, '/v1/console/card-templates/template_123', body: success_response,
+                                                                        request_body: keyword_request_body)
+
+      template = console.update_template(
+        card_template_id: 'template_123',
+        name: 'Updated Badge',
+        watch_count: 3
+      )
+
+      expect(template).to be_a(AccessGrid::Template)
+      expect(template.id).to eq('template_123')
     end
   end
 
