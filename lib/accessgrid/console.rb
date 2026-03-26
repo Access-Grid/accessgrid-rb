@@ -61,6 +61,8 @@ module AccessGrid
       response
     end
 
+    alias ledger_items list_ledger_items
+
     private
 
     def transform_template_params(params)
