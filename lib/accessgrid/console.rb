@@ -4,12 +4,13 @@
 module AccessGrid
   # Manages enterprise template and logging operations.
   class Console
-    attr_reader :webhooks, :hid
+    attr_reader :webhooks, :hid, :credential_profiles
 
     def initialize(client)
       @client = client
       @webhooks = Webhooks.new(client)
       @hid = HID.new(client)
+      @credential_profiles = CredentialProfiles.new(client)
     end
 
     def create_template(params)
@@ -73,6 +74,22 @@ module AccessGrid
       IosPreflight.new(response)
     end
 
+    def list_landing_pages
+      response = @client.make_request(:get, '/v1/console/landing-pages')
+      pages = response.is_a?(Array) ? response : response.fetch('landing_pages', [])
+      pages.map { |page| LandingPage.new(page) }
+    end
+
+    def create_landing_page(**params)
+      response = @client.make_request(:post, '/v1/console/landing-pages', params)
+      LandingPage.new(response)
+    end
+
+    def update_landing_page(landing_page_id:, **params)
+      response = @client.make_request(:put, "/v1/console/landing-pages/#{landing_page_id}", params)
+      LandingPage.new(response)
+    end
+
     private
 
     def transform_template_params(params)
@@ -91,7 +108,8 @@ module AccessGrid
   class Template
     attr_reader :id, :name, :platform, :protocol, :use_case, :created_at,
                 :last_published_at, :issued_keys_count, :active_keys_count,
-                :allowed_device_counts, :support_settings, :terms_settings, :style_settings
+                :allowed_device_counts, :support_settings, :terms_settings, :style_settings,
+                :metadata
 
     def initialize(data)
       @id = data['id']
@@ -107,6 +125,7 @@ module AccessGrid
       @support_settings = data['support_settings']
       @terms_settings = data['terms_settings']
       @style_settings = data['style_settings']
+      @metadata = data['metadata'] || {}
     end
   end
 
@@ -202,6 +221,54 @@ module AccessGrid
       @protocol = data['protocol']
       @platform = data['platform']
       @use_case = data['use_case']
+    end
+  end
+
+  # Represents a landing page configuration.
+  class LandingPage
+    attr_reader :id, :name, :created_at, :kind, :password_protected, :logo_url
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @created_at = data['created_at']
+      @kind = data['kind']
+      @password_protected = data['password_protected']
+      @logo_url = data['logo_url']
+    end
+  end
+
+  # Represents a credential profile configuration.
+  class CredentialProfile
+    attr_reader :id, :aid, :name, :apple_id, :created_at, :card_storage, :keys, :files
+
+    def initialize(data)
+      @id = data['id']
+      @aid = data['aid']
+      @name = data['name']
+      @apple_id = data['apple_id']
+      @created_at = data['created_at']
+      @card_storage = data['card_storage']
+      @keys = data['keys'] || []
+      @files = data['files'] || []
+    end
+  end
+
+  # Manages credential profile operations.
+  class CredentialProfiles
+    def initialize(client)
+      @client = client
+    end
+
+    def create(**params)
+      response = @client.make_request(:post, '/v1/console/credential-profiles', params)
+      CredentialProfile.new(response)
+    end
+
+    def list
+      response = @client.make_request(:get, '/v1/console/credential-profiles')
+      profiles = response.is_a?(Array) ? response : response.fetch('credential_profiles', [])
+      profiles.map { |profile| CredentialProfile.new(profile) }
     end
   end
 

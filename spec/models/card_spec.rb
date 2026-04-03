@@ -23,7 +23,10 @@ RSpec.describe AccessGrid::Card do
             { 'type' => 'watch', 'id' => 'dev_2' }
           ],
           'metadata' => { 'department' => 'Sales', 'badge_id' => 'B001' },
-          'temporary' => true
+          'temporary' => true,
+          'employee_id' => 'emp_789',
+          'organization_name' => 'Acme Corp',
+          'created_at' => '2025-06-01T00:00:00Z'
         }
       end
 
@@ -91,6 +94,18 @@ RSpec.describe AccessGrid::Card do
       it 'sets temporary' do
         expect(card.temporary).to eq(true)
       end
+
+      it 'sets employee_id' do
+        expect(card.employee_id).to eq('emp_789')
+      end
+
+      it 'sets organization_name' do
+        expect(card.organization_name).to eq('Acme Corp')
+      end
+
+      it 'sets created_at' do
+        expect(card.created_at).to eq('2025-06-01T00:00:00Z')
+      end
     end
 
     context 'with minimal data' do
@@ -114,6 +129,9 @@ RSpec.describe AccessGrid::Card do
         expect(card.direct_install_url).to be_nil
         expect(card.details).to be_nil
         expect(card.temporary).to be_nil
+        expect(card.employee_id).to be_nil
+        expect(card.organization_name).to be_nil
+        expect(card.created_at).to be_nil
       end
 
       it 'defaults devices to empty array' do

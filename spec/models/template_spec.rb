@@ -28,7 +28,8 @@ RSpec.describe AccessGrid::Template do
           'style_settings' => {
             'background_color' => '#FFFFFF',
             'label_color' => '#000000'
-          }
+          },
+          'metadata' => { 'version' => '2.1', 'approval_status' => 'approved' }
         }
       end
 
@@ -94,6 +95,10 @@ RSpec.describe AccessGrid::Template do
                                                 'label_color' => '#000000'
                                               })
       end
+
+      it 'sets metadata' do
+        expect(template.metadata).to eq({ 'version' => '2.1', 'approval_status' => 'approved' })
+      end
     end
 
     context 'with minimal data' do
@@ -118,6 +123,10 @@ RSpec.describe AccessGrid::Template do
         expect(template.support_settings).to be_nil
         expect(template.terms_settings).to be_nil
         expect(template.style_settings).to be_nil
+      end
+
+      it 'defaults metadata to empty hash' do
+        expect(template.metadata).to eq({})
       end
     end
 
