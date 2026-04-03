@@ -745,6 +745,231 @@ RSpec.describe AccessGrid::Console do
     end
   end
 
+  describe '#list_landing_pages' do
+    let(:landing_pages_response) do
+      [
+        {
+          id: 'lp_1',
+          name: 'Miami Office',
+          created_at: '2025-01-01T00:00:00Z',
+          kind: 'universal',
+          password_protected: false,
+          logo_url: 'https://example.com/logo.png'
+        },
+        {
+          id: 'lp_2',
+          name: 'NYC Office',
+          created_at: '2025-01-02T00:00:00Z',
+          kind: 'universal',
+          password_protected: true,
+          logo_url: nil
+        }
+      ]
+    end
+
+    it 'returns a list of landing pages' do
+      stub_api_request(
+        :get,
+        '/v1/console/landing-pages',
+        body: landing_pages_response,
+        query: generate_sig_payload(id: :'landing-pages')
+      )
+
+      pages = console.list_landing_pages
+
+      expect(pages).to be_an(Array)
+      expect(pages.length).to eq(2)
+      expect(pages.first).to be_a(AccessGrid::LandingPage)
+      expect(pages.first.id).to eq('lp_1')
+      expect(pages.first.name).to eq('Miami Office')
+      expect(pages.first.kind).to eq('universal')
+      expect(pages.first.password_protected).to eq(false)
+      expect(pages.first.logo_url).to eq('https://example.com/logo.png')
+    end
+
+    it 'returns empty array when no landing pages' do
+      stub_api_request(
+        :get,
+        '/v1/console/landing-pages',
+        body: [],
+        query: generate_sig_payload(id: :'landing-pages')
+      )
+
+      pages = console.list_landing_pages
+      expect(pages).to eq([])
+    end
+  end
+
+  describe '#create_landing_page' do
+    let(:create_response) do
+      {
+        id: 'lp_new',
+        name: 'Miami Office Access Pass',
+        created_at: '2025-06-01T00:00:00Z',
+        kind: 'universal',
+        password_protected: false,
+        logo_url: nil
+      }
+    end
+
+    it 'creates a landing page' do
+      request_body = {
+        name: 'Miami Office Access Pass',
+        kind: 'universal',
+        additional_text: 'Welcome to the Miami Office',
+        bg_color: '#f1f5f9',
+        allow_immediate_download: true
+      }
+
+      stub_api_request(
+        :post,
+        '/v1/console/landing-pages',
+        body: create_response,
+        request_body: request_body
+      )
+
+      page = console.create_landing_page(**request_body)
+
+      expect(page).to be_a(AccessGrid::LandingPage)
+      expect(page.id).to eq('lp_new')
+      expect(page.name).to eq('Miami Office Access Pass')
+      expect(page.kind).to eq('universal')
+    end
+  end
+
+  describe '#update_landing_page' do
+    let(:update_response) do
+      {
+        id: 'lp_1',
+        name: 'Updated Miami Office',
+        created_at: '2025-06-01T00:00:00Z',
+        kind: 'universal',
+        password_protected: false,
+        logo_url: nil
+      }
+    end
+
+    it 'updates a landing page' do
+      request_body = {
+        name: 'Updated Miami Office',
+        additional_text: 'Welcome!',
+        bg_color: '#e2e8f0'
+      }
+
+      stub_api_request(
+        :put,
+        '/v1/console/landing-pages/lp_1',
+        body: update_response,
+        request_body: request_body
+      )
+
+      page = console.update_landing_page(landing_page_id: 'lp_1', **request_body)
+
+      expect(page).to be_a(AccessGrid::LandingPage)
+      expect(page.id).to eq('lp_1')
+      expect(page.name).to eq('Updated Miami Office')
+    end
+  end
+
+  describe 'credential_profiles' do
+    let(:profiles_service) { console.credential_profiles }
+
+    describe '#create' do
+      let(:create_response) do
+        {
+          id: 'cp_123',
+          aid: 'F0394148',
+          name: 'Main Office Profile',
+          apple_id: 'pass.com.example',
+          created_at: '2025-06-01T00:00:00Z',
+          card_storage: 2048,
+          keys: [{ 'value' => 'abcdef1234567890abcdef1234567890' }],
+          files: []
+        }
+      end
+
+      it 'creates a credential profile' do
+        request_body = {
+          name: 'Main Office Profile',
+          app_name: 'KEY-ID-main',
+          keys: [{ value: 'abcdef1234567890abcdef1234567890' }]
+        }
+
+        stub_api_request(
+          :post,
+          '/v1/console/credential-profiles',
+          body: create_response,
+          request_body: request_body
+        )
+
+        profile = profiles_service.create(**request_body)
+
+        expect(profile).to be_a(AccessGrid::CredentialProfile)
+        expect(profile.id).to eq('cp_123')
+        expect(profile.aid).to eq('F0394148')
+        expect(profile.name).to eq('Main Office Profile')
+        expect(profile.keys).to eq([{ 'value' => 'abcdef1234567890abcdef1234567890' }])
+      end
+    end
+
+    describe '#list' do
+      let(:list_response) do
+        [
+          {
+            id: 'cp_1',
+            aid: 'F0394148',
+            name: 'Profile A',
+            apple_id: nil,
+            created_at: '2025-01-01T00:00:00Z',
+            card_storage: 2048,
+            keys: [],
+            files: []
+          },
+          {
+            id: 'cp_2',
+            aid: 'F0394149',
+            name: 'Profile B',
+            apple_id: nil,
+            created_at: '2025-01-02T00:00:00Z',
+            card_storage: 4096,
+            keys: [],
+            files: []
+          }
+        ]
+      end
+
+      it 'returns a list of credential profiles' do
+        stub_api_request(
+          :get,
+          '/v1/console/credential-profiles',
+          body: list_response,
+          query: generate_sig_payload(id: :'credential-profiles')
+        )
+
+        profiles = profiles_service.list
+
+        expect(profiles).to be_an(Array)
+        expect(profiles.length).to eq(2)
+        expect(profiles.first).to be_a(AccessGrid::CredentialProfile)
+        expect(profiles.first.id).to eq('cp_1')
+        expect(profiles.first.aid).to eq('F0394148')
+        expect(profiles.last.id).to eq('cp_2')
+      end
+
+      it 'returns empty array when no profiles' do
+        stub_api_request(
+          :get,
+          '/v1/console/credential-profiles',
+          body: [],
+          query: generate_sig_payload(id: :'credential-profiles')
+        )
+
+        profiles = profiles_service.list
+        expect(profiles).to eq([])
+      end
+    end
+  end
+
   describe 'HID orgs' do
     let(:org_response) do
       {

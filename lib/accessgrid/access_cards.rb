@@ -66,7 +66,8 @@ module AccessGrid
   class Card
     attr_reader :id, :state, :url, :install_url, :details, :full_name,
                 :expiration_date, :card_template_id, :card_number, :site_code,
-                :file_data, :direct_install_url, :devices, :metadata, :temporary
+                :file_data, :direct_install_url, :devices, :metadata, :temporary,
+                :employee_id, :organization_name, :created_at
 
     def initialize(data)
       data ||= {}
@@ -86,6 +87,9 @@ module AccessGrid
       @devices = data.fetch('devices', [])
       @metadata = data.fetch('metadata', {})
       @temporary = data.fetch('temporary', nil)
+      @employee_id = data.fetch('employee_id', nil)
+      @organization_name = data.fetch('organization_name', nil)
+      @created_at = data.fetch('created_at', nil)
     end
 
     def to_s
