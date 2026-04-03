@@ -258,8 +258,13 @@ RSpec.describe AccessGrid::Request do
       expect(request.net_http_request).to be_a(Net::HTTP::Patch)
     end
 
-    it 'raises ArgumentError for unsupported HTTP method' do
+    it 'returns Net::HTTP::Delete for :delete method' do
       request = build_request(http_method: :delete)
+      expect(request.net_http_request).to be_a(Net::HTTP::Delete)
+    end
+
+    it 'raises ArgumentError for unsupported HTTP method' do
+      request = build_request(http_method: :options)
       expect { request.net_http_request }.to raise_error(ArgumentError, /Unsupported HTTP method/)
     end
 

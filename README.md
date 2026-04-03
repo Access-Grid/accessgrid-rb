@@ -239,6 +239,90 @@ end
 puts response['pagination'] # { "current_page" => 1, "total_pages" => 3, ... }
 ```
 
+#### iOS In-App Provisioning Preflight
+
+```ruby
+response = client.console.ios_preflight(
+  card_template_id: "0xt3mp14t3-3x1d",
+  access_pass_ex_id: "0xp455-3x1d"
+)
+
+puts "Provisioning Credential ID: #{response.provisioning_credential_identifier}"
+puts "Sharing Instance ID: #{response.sharing_instance_identifier}"
+puts "Card Template ID: #{response.card_template_identifier}"
+puts "Environment ID: #{response.environment_identifier}"
+```
+
+### Webhooks
+
+#### Create a webhook
+
+```ruby
+webhook = client.console.webhooks.create(
+  name: 'Production',
+  url: 'https://example.com/webhooks',
+  subscribed_events: ['ag.access_pass.issued']
+)
+
+puts "Webhook created: #{webhook.id}"
+puts "Private key: #{webhook.private_key}"
+```
+
+#### List webhooks
+
+```ruby
+webhooks = client.console.webhooks.list
+
+webhooks.each do |webhook|
+  puts "ID: #{webhook.id}, Name: #{webhook.name}"
+end
+```
+
+#### Delete a webhook
+
+```ruby
+client.console.webhooks.delete('abc123')
+```
+
+### HID Organizations
+
+#### Create an HID org
+
+```ruby
+org = client.console.hid.orgs.create(
+  name: 'My Org',
+  full_address: '1 Main St, NY NY',
+  phone: '+1-555-0000',
+  first_name: 'Ada',
+  last_name: 'Lovelace'
+)
+
+puts "Created org: #{org.name} (ID: #{org.id})"
+puts "Slug: #{org.slug}"
+```
+
+#### List HID orgs
+
+```ruby
+orgs = client.console.hid.orgs.list
+
+orgs.each do |org|
+  puts "Org ID: #{org.id}, Name: #{org.name}, Slug: #{org.slug}"
+end
+```
+
+#### Activate an HID org
+
+```ruby
+result = client.console.hid.orgs.activate(
+  email: 'admin@example.com',
+  password: 'hid-password-123'
+)
+
+puts "Completed registration for org: #{result.name}"
+puts "Status: #{result.status}"
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -313,14 +397,14 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/card-templates/{id} | `console.read_template()` | Y |
 | GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
 | GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
-| POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | - |
+| POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
-| GET /v1/console/webhooks | `console.webhooks.list()` | - |
-| POST /v1/console/webhooks | `console.webhooks.create()` | - |
-| DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | - |
-| POST /v1/console/hid/orgs | `console.hid.orgs.create()` | - |
-| POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | - |
-| GET /v1/console/hid/orgs | `console.hid.orgs.list()` | - |
+| GET /v1/console/webhooks | `console.webhooks.list()` | Y |
+| POST /v1/console/webhooks | `console.webhooks.create()` | Y |
+| DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | Y |
+| POST /v1/console/hid/orgs | `console.hid.orgs.create()` | Y |
+| POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | Y |
+| GET /v1/console/hid/orgs | `console.hid.orgs.list()` | Y |
 
 ## License
 

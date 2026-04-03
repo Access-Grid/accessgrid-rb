@@ -6,6 +6,13 @@ module AccessGrid
   # Builds and configures HTTP requests for the AccessGrid API.
   class Request
     PAYLOAD_SIGNATURE_PARAM = :sig_payload
+    HTTP_METHODS = {
+      get: Net::HTTP::Get,
+      post: Net::HTTP::Post,
+      put: Net::HTTP::Put,
+      patch: Net::HTTP::Patch,
+      delete: Net::HTTP::Delete
+    }.freeze
 
     attr_reader :account_id, :body, :http_method, :params, :payload, :uri
 
@@ -40,16 +47,9 @@ module AccessGrid
     private
 
     def generate_net_http_request!
-      klass =
-        case http_method
-        when :get   then  Net::HTTP::Get
-        when :post  then  Net::HTTP::Post
-        when :put   then  Net::HTTP::Put
-        when :patch then  Net::HTTP::Patch
-        else
-          raise ArgumentError, "Unsupported HTTP method: #{http_method}"
-        end
-
+      klass = HTTP_METHODS.fetch(http_method) do
+        raise ArgumentError, "Unsupported HTTP method: #{http_method}"
+      end
       klass.new(uri.request_uri)
     end
 
@@ -89,6 +89,10 @@ module AccessGrid
       http_method == :get
     end
 
+    def delete?
+      http_method == :delete
+    end
+
     def post?
       http_method == :post
     end
@@ -98,7 +102,7 @@ module AccessGrid
     end
 
     def post_without_body_or_get?
-      get? || (post? && empty_body?)
+      get? || delete? || (post? && empty_body?)
     end
 
     def default_payload

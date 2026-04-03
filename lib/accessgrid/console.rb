@@ -4,8 +4,12 @@
 module AccessGrid
   # Manages enterprise template and logging operations.
   class Console
+    attr_reader :webhooks, :hid
+
     def initialize(client)
       @client = client
+      @webhooks = Webhooks.new(client)
+      @hid = HID.new(client)
     end
 
     def create_template(params)
@@ -62,6 +66,12 @@ module AccessGrid
     end
 
     alias ledger_items list_ledger_items
+
+    def ios_preflight(card_template_id:, access_pass_ex_id:)
+      data = { access_pass_ex_id: access_pass_ex_id }
+      response = @client.make_request(:post, "/v1/console/card-templates/#{card_template_id}/ios_preflight", data)
+      IosPreflight.new(response)
+    end
 
     private
 
@@ -141,6 +151,19 @@ module AccessGrid
     end
   end
 
+  # Represents an iOS In-App Provisioning preflight response.
+  class IosPreflight
+    attr_reader :provisioning_credential_identifier, :sharing_instance_identifier,
+                :card_template_identifier, :environment_identifier
+
+    def initialize(data)
+      @provisioning_credential_identifier = data['provisioningCredentialIdentifier']
+      @sharing_instance_identifier = data['sharingInstanceIdentifier']
+      @card_template_identifier = data['cardTemplateIdentifier']
+      @environment_identifier = data['environmentIdentifier']
+    end
+  end
+
   # Represents a billing ledger item.
   class LedgerItem
     attr_reader :created_at, :amount, :id, :kind, :metadata, :access_pass
@@ -179,6 +202,107 @@ module AccessGrid
       @protocol = data['protocol']
       @platform = data['platform']
       @use_case = data['use_case']
+    end
+  end
+
+  # Manages webhook operations.
+  class Webhooks
+    def initialize(client)
+      @client = client
+    end
+
+    def create(name:, url:, subscribed_events:, auth_method: 'bearer_token')
+      data = {
+        name: name,
+        url: url,
+        subscribed_events: subscribed_events,
+        auth_method: auth_method
+      }
+      response = @client.make_request(:post, '/v1/console/webhooks', data)
+      Webhook.new(response)
+    end
+
+    def list(**params)
+      response = @client.make_request(:get, '/v1/console/webhooks', nil, params)
+      (response['webhooks'] || []).map { |wh| Webhook.new(wh) }
+    end
+
+    def delete(webhook_id)
+      @client.make_request(:delete, "/v1/console/webhooks/#{webhook_id}")
+    end
+  end
+
+  # Represents a webhook configuration.
+  class Webhook
+    attr_reader :id, :name, :url, :auth_method, :subscribed_events,
+                :created_at, :private_key, :client_cert, :cert_expires_at
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @url = data['url']
+      @auth_method = data['auth_method']
+      @subscribed_events = data['subscribed_events']
+      @created_at = data['created_at']
+      @private_key = data['private_key']
+      @client_cert = data['client_cert']
+      @cert_expires_at = data['cert_expires_at']
+    end
+  end
+
+  # Provides access to HID-related services.
+  class HID
+    attr_reader :orgs
+
+    def initialize(client)
+      @orgs = HIDOrgs.new(client)
+    end
+  end
+
+  # Manages HID organization operations.
+  class HIDOrgs
+    def initialize(client)
+      @client = client
+    end
+
+    def create(name:, full_address:, phone:, first_name:, last_name:)
+      data = {
+        name: name,
+        full_address: full_address,
+        phone: phone,
+        first_name: first_name,
+        last_name: last_name
+      }
+      response = @client.make_request(:post, '/v1/console/hid/orgs', data)
+      HidOrg.new(response)
+    end
+
+    def list
+      response = @client.make_request(:get, '/v1/console/hid/orgs')
+      response.map { |org| HidOrg.new(org) }
+    end
+
+    def activate(email:, password:)
+      data = { email: email, password: password }
+      response = @client.make_request(:post, '/v1/console/hid/orgs/activate', data)
+      HidOrg.new(response)
+    end
+  end
+
+  # Represents an HID organization.
+  class HidOrg
+    attr_reader :id, :name, :slug, :first_name, :last_name, :phone, :full_address, :status, :created_at
+
+    def initialize(data)
+      @id = data['id']
+      @name = data['name']
+      @slug = data['slug']
+      @first_name = data['first_name']
+      @last_name = data['last_name']
+      @phone = data['phone']
+      @full_address = data['full_address']
+      @status = data['status']
+      @created_at = data['created_at']
     end
   end
 end

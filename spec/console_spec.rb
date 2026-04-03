@@ -627,4 +627,222 @@ RSpec.describe AccessGrid::Console do
       expect(console.method(:ledger_items)).to eq(console.method(:list_ledger_items))
     end
   end
+
+  describe '#ios_preflight' do
+    let(:preflight_response) do
+      {
+        provisioningCredentialIdentifier: 'prov_cred_123',
+        sharingInstanceIdentifier: 'share_inst_456',
+        cardTemplateIdentifier: 'card_tmpl_789',
+        environmentIdentifier: 'env_abc'
+      }
+    end
+
+    it 'returns an IosPreflight object' do
+      stub_api_request(
+        :post,
+        '/v1/console/card-templates/tmpl_123/ios_preflight',
+        body: preflight_response,
+        request_body: { access_pass_ex_id: 'pass_456' }
+      )
+
+      result = console.ios_preflight(
+        card_template_id: 'tmpl_123',
+        access_pass_ex_id: 'pass_456'
+      )
+
+      expect(result).to be_a(AccessGrid::IosPreflight)
+      expect(result.provisioning_credential_identifier).to eq('prov_cred_123')
+      expect(result.sharing_instance_identifier).to eq('share_inst_456')
+      expect(result.card_template_identifier).to eq('card_tmpl_789')
+      expect(result.environment_identifier).to eq('env_abc')
+    end
+  end
+
+  describe '#webhooks' do
+    let(:webhooks_service) { console.webhooks }
+
+    describe '#create' do
+      let(:create_response) do
+        {
+          id: 'wh_123',
+          name: 'Production',
+          url: 'https://example.com/webhooks',
+          auth_method: 'bearer_token',
+          subscribed_events: ['ag.access_pass.issued'],
+          created_at: '2025-01-01T00:00:00Z',
+          private_key: 'pk_secret_123'
+        }
+      end
+
+      it 'creates a webhook' do
+        stub_api_request(
+          :post,
+          '/v1/console/webhooks',
+          body: create_response,
+          request_body: {
+            name: 'Production',
+            url: 'https://example.com/webhooks',
+            subscribed_events: ['ag.access_pass.issued'],
+            auth_method: 'bearer_token'
+          }
+        )
+
+        webhook = webhooks_service.create(
+          name: 'Production',
+          url: 'https://example.com/webhooks',
+          subscribed_events: ['ag.access_pass.issued']
+        )
+
+        expect(webhook).to be_a(AccessGrid::Webhook)
+        expect(webhook.id).to eq('wh_123')
+        expect(webhook.name).to eq('Production')
+        expect(webhook.private_key).to eq('pk_secret_123')
+      end
+    end
+
+    describe '#list' do
+      let(:list_response) do
+        {
+          webhooks: [
+            { id: 'wh_1', name: 'Prod', url: 'https://example.com/wh1', auth_method: 'bearer_token' },
+            { id: 'wh_2', name: 'Staging', url: 'https://example.com/wh2', auth_method: 'bearer_token' }
+          ],
+          pagination: { current_page: 1, total_pages: 1 }
+        }
+      end
+
+      it 'lists webhooks' do
+        stub_api_request(
+          :get,
+          '/v1/console/webhooks',
+          body: list_response,
+          query: generate_sig_payload(id: :webhooks)
+        )
+
+        webhooks = webhooks_service.list
+
+        expect(webhooks).to be_an(Array)
+        expect(webhooks.length).to eq(2)
+        expect(webhooks.first).to be_a(AccessGrid::Webhook)
+        expect(webhooks.first.id).to eq('wh_1')
+      end
+    end
+
+    describe '#delete' do
+      it 'deletes a webhook' do
+        stub_api_request(
+          :delete,
+          '/v1/console/webhooks/wh_123',
+          status: 204,
+          body: {},
+          query: generate_sig_payload(id: :wh_123)
+        )
+
+        result = webhooks_service.delete('wh_123')
+        expect(result).to eq({})
+      end
+    end
+  end
+
+  describe 'HID orgs' do
+    let(:org_response) do
+      {
+        id: 'org_123',
+        name: 'My Org',
+        slug: 'my-org',
+        first_name: 'Ada',
+        last_name: 'Lovelace',
+        phone: '+1-555-0000',
+        full_address: '1 Main St, NY NY',
+        status: 'pending',
+        created_at: '2025-01-01T00:00:00Z'
+      }
+    end
+
+    describe '#hid.orgs.create' do
+      it 'creates a new HID org' do
+        request_body = {
+          name: 'My Org',
+          full_address: '1 Main St, NY NY',
+          phone: '+1-555-0000',
+          first_name: 'Ada',
+          last_name: 'Lovelace'
+        }
+
+        stub_api_request(:post, '/v1/console/hid/orgs', body: org_response, request_body: request_body)
+
+        org = console.hid.orgs.create(
+          name: 'My Org',
+          full_address: '1 Main St, NY NY',
+          phone: '+1-555-0000',
+          first_name: 'Ada',
+          last_name: 'Lovelace'
+        )
+
+        expect(org).to be_a(AccessGrid::HidOrg)
+        expect(org.id).to eq('org_123')
+        expect(org.name).to eq('My Org')
+        expect(org.slug).to eq('my-org')
+        expect(org.first_name).to eq('Ada')
+        expect(org.last_name).to eq('Lovelace')
+        expect(org.phone).to eq('+1-555-0000')
+        expect(org.full_address).to eq('1 Main St, NY NY')
+        expect(org.status).to eq('pending')
+        expect(org.created_at).to eq('2025-01-01T00:00:00Z')
+      end
+    end
+
+    describe '#hid.orgs.list' do
+      it 'returns a list of HID orgs' do
+        list_response = [org_response, org_response.merge(id: 'org_456', name: 'Other Org', slug: 'other-org')]
+
+        stub_api_request(
+          :get,
+          '/v1/console/hid/orgs',
+          body: list_response,
+          query: generate_sig_payload(id: :orgs)
+        )
+
+        orgs = console.hid.orgs.list
+
+        expect(orgs).to be_an(Array)
+        expect(orgs.length).to eq(2)
+        expect(orgs.first).to be_a(AccessGrid::HidOrg)
+        expect(orgs.first.id).to eq('org_123')
+        expect(orgs.last.id).to eq('org_456')
+      end
+
+      it 'returns empty array when no orgs' do
+        stub_api_request(
+          :get,
+          '/v1/console/hid/orgs',
+          body: [],
+          query: generate_sig_payload(id: :orgs)
+        )
+
+        orgs = console.hid.orgs.list
+
+        expect(orgs).to eq([])
+      end
+    end
+
+    describe '#hid.orgs.activate' do
+      it 'activates an HID org with credentials' do
+        activated_response = org_response.merge(status: 'active')
+        request_body = { email: 'admin@example.com', password: 'hid-password-123' }
+
+        stub_api_request(:post, '/v1/console/hid/orgs/activate', body: activated_response, request_body: request_body)
+
+        org = console.hid.orgs.activate(
+          email: 'admin@example.com',
+          password: 'hid-password-123'
+        )
+
+        expect(org).to be_a(AccessGrid::HidOrg)
+        expect(org.status).to eq('active')
+        expect(org.name).to eq('My Org')
+      end
+    end
+  end
 end
