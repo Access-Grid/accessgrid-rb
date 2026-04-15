@@ -46,14 +46,32 @@ module AccessGrid
       response['logs'] || []
     end
 
+    # Lists card (pass) template pairs.
+    #
+    # The upstream JSON key is "card_template_pairs"; we remap it back to
+    # "pass_template_pairs" in the returned hash for backward compatibility.
     def list_pass_template_pairs(params = {})
-      response = @client.make_request(:get, '/v1/console/pass-template-pairs', nil, params)
+      response = @client.make_request(:get, '/v1/console/card-template-pairs', nil, params)
 
-      if response['pass_template_pairs']
-        response['pass_template_pairs'] = response['pass_template_pairs'].map { |pair| PassTemplatePair.new(pair) }
+      if response.key?('card_template_pairs')
+        pairs = response.delete('card_template_pairs')
+        response['pass_template_pairs'] = pairs&.map { |pair| PassTemplatePair.new(pair) }
       end
 
       response
+    end
+
+    # Creates a new pass template pair linking an Apple (iOS) and Google
+    # (Android) card template. Both templates must be published
+    # (status: ready) and use the same protocol.
+    def create_pass_template_pair(name:, apple_card_template_id:, google_card_template_id:)
+      data = {
+        name: name,
+        apple_card_template_id: apple_card_template_id,
+        google_card_template_id: google_card_template_id
+      }
+      response = @client.make_request(:post, '/v1/console/card-template-pairs', data)
+      PassTemplatePair.new(response)
     end
 
     def list_ledger_items(params = {})
@@ -146,12 +164,13 @@ module AccessGrid
 
   # Represents a paired iOS and Android template configuration.
   class PassTemplatePair
-    attr_reader :id, :name, :created_at, :android_template, :ios_template
+    attr_reader :id, :ex_id, :name, :created_at, :android_template, :ios_template
 
     def initialize(data)
       android_template = data['android_template']
       ios_template = data['ios_template']
       @id = data['id']
+      @ex_id = data['ex_id']
       @name = data['name']
       @created_at = data['created_at']
       @android_template = android_template ? TemplateInfo.new(android_template) : nil
@@ -161,10 +180,11 @@ module AccessGrid
 
   # Minimal template info used within PassTemplatePair.
   class TemplateInfo
-    attr_reader :id, :name, :platform
+    attr_reader :id, :ex_id, :name, :platform
 
     def initialize(data)
       @id = data['id']
+      @ex_id = data['ex_id']
       @name = data['name']
       @platform = data['platform']
     end

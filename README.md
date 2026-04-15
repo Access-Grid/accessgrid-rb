@@ -225,6 +225,19 @@ end
 puts response['pagination'] # { "current_page" => 1, "total_pages" => 5, ... }
 ```
 
+#### Create a pass template pair
+
+```ruby
+# Both card templates must be published (status: ready) and use the same protocol.
+pair = client.console.create_pass_template_pair(
+  name: 'Employee Badge Pair',
+  apple_card_template_id: '0xapplet3mp14t3',
+  google_card_template_id: '0xgoogl3t3mp14t3'
+)
+
+puts "Created pair: #{pair.name} (#{pair.id})"
+```
+
 #### List ledger items
 
 ```ruby
@@ -477,7 +490,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | PUT /v1/console/card-templates/{id} | `console.update_template()` | Y |
 | GET /v1/console/card-templates/{id} | `console.read_template()` | Y |
 | GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
-| GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
+| GET /v1/console/card-template-pairs | `console.list_pass_template_pairs()` | Y |
+| POST /v1/console/card-template-pairs | `console.create_pass_template_pair()` | Y |
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |

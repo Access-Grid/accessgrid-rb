@@ -327,19 +327,22 @@ RSpec.describe AccessGrid::Console do
   describe '#list_pass_template_pairs' do
     let(:pairs_response) do
       {
-        pass_template_pairs: [
+        card_template_pairs: [
           {
             id: 'pair_1',
+            ex_id: 'pair_1',
             name: 'Employee Badge Pair',
             created_at: '2025-01-01T00:00:00Z',
-            ios_template: { id: 'tmpl_ios_1', name: 'iOS Badge', platform: 'apple' },
-            android_template: { id: 'tmpl_android_1', name: 'Android Badge', platform: 'android' }
+            ios_template: { id: 'tmpl_ios_1', ex_id: 'tmpl_ios_1', name: 'iOS Badge', platform: 'apple' },
+            android_template: { id: 'tmpl_android_1', ex_id: 'tmpl_android_1', name: 'Android Badge',
+                                platform: 'android' }
           },
           {
             id: 'pair_2',
+            ex_id: 'pair_2',
             name: 'Contractor Badge Pair',
             created_at: '2025-01-02T00:00:00Z',
-            ios_template: { id: 'tmpl_ios_2', name: 'iOS Contractor', platform: 'apple' },
+            ios_template: { id: 'tmpl_ios_2', ex_id: 'tmpl_ios_2', name: 'iOS Contractor', platform: 'apple' },
             android_template: nil
           }
         ],
@@ -353,9 +356,9 @@ RSpec.describe AccessGrid::Console do
     it 'returns pass template pairs' do
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: pairs_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
@@ -363,20 +366,23 @@ RSpec.describe AccessGrid::Console do
       expect(response).to be_a(Hash)
       expect(response['pass_template_pairs']).to be_an(Array)
       expect(response['pass_template_pairs'].length).to eq(2)
+      expect(response.key?('card_template_pairs')).to be(false)
 
       first_pair = response['pass_template_pairs'].first
       expect(first_pair).to be_a(AccessGrid::PassTemplatePair)
       expect(first_pair.id).to eq('pair_1')
+      expect(first_pair.ex_id).to eq('pair_1')
       expect(first_pair.ios_template).to be_a(AccessGrid::TemplateInfo)
+      expect(first_pair.ios_template.ex_id).to eq('tmpl_ios_1')
       expect(first_pair.android_template).to be_a(AccessGrid::TemplateInfo)
     end
 
     it 'accepts pagination params' do
-      query = { page: 2, per_page: 10 }.merge(generate_sig_payload(id: :'pass-template-pairs'))
+      query = { page: 2, per_page: 10 }.merge(generate_sig_payload(id: :'card-template-pairs'))
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: pairs_response,
         query: query
       )
@@ -387,13 +393,13 @@ RSpec.describe AccessGrid::Console do
     end
 
     it 'handles empty response' do
-      empty_response = { pass_template_pairs: [], pagination: { current_page: 1, total_pages: 0 } }
+      empty_response = { card_template_pairs: [], pagination: { current_page: 1, total_pages: 0 } }
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: empty_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
@@ -401,19 +407,58 @@ RSpec.describe AccessGrid::Console do
       expect(response['pass_template_pairs']).to eq([])
     end
 
-    it 'handles nil pass_template_pairs in response' do
-      nil_response = { pass_template_pairs: nil }
+    it 'handles nil card_template_pairs in response' do
+      nil_response = { card_template_pairs: nil }
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: nil_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
 
       expect(response['pass_template_pairs']).to be_nil
+    end
+  end
+
+  describe '#create_pass_template_pair' do
+    let(:pair_response) do
+      {
+        id: 'pair_new',
+        ex_id: 'pair_new',
+        name: 'New Badge Pair',
+        created_at: '2026-04-15T12:00:00Z',
+        ios_template: { id: 'tmpl_ios', ex_id: 'tmpl_ios', name: 'iOS Badge', platform: 'apple' },
+        android_template: { id: 'tmpl_android', ex_id: 'tmpl_android', name: 'Android Badge', platform: 'android' }
+      }
+    end
+
+    it 'posts to /v1/console/card-template-pairs and returns a PassTemplatePair' do
+      stub_api_request(
+        :post,
+        '/v1/console/card-template-pairs',
+        body: pair_response,
+        request_body: hash_including(
+          name: 'New Badge Pair',
+          apple_card_template_id: 'tmpl_ios',
+          google_card_template_id: 'tmpl_android'
+        )
+      )
+
+      pair = console.create_pass_template_pair(
+        name: 'New Badge Pair',
+        apple_card_template_id: 'tmpl_ios',
+        google_card_template_id: 'tmpl_android'
+      )
+
+      expect(pair).to be_a(AccessGrid::PassTemplatePair)
+      expect(pair.id).to eq('pair_new')
+      expect(pair.ex_id).to eq('pair_new')
+      expect(pair.name).to eq('New Badge Pair')
+      expect(pair.ios_template.platform).to eq('apple')
+      expect(pair.android_template.platform).to eq('android')
     end
   end
 
