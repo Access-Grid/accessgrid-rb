@@ -43,15 +43,25 @@ client = AccessGrid.new(account_id, secret_key)
 card = client.access_cards.issue(
   card_template_id: card_template_id,
   employee_id: "123456789",
-  card_number: "16187",
   tag_id: "DDEADB33FB00B5",
   full_name: "Employee name",
   email: "employee@yourwebsite.com",
   phone_number: "+19547212241",
   classification: "full_time",
-  start_date: "2025-01-31T22:46:25.601Z",
-  expiration_date: "2025-04-30T22:46:25.601Z",
-  employee_photo: "[image_in_base64_encoded_format]"
+  department: "Engineering",
+  location: "San Francisco",
+  site_name: "HQ Building A",
+  workstation: "4F-207",
+  mail_stop: "MS-401",
+  company_address: "123 Main St, San Francisco, CA 94105",
+  start_date: Time.now.utc.iso8601(3),
+  expiration_date: 3.months.from_now.utc.iso8601(3),
+  employee_photo: "[image_in_base64_encoded_format]",
+  title: "Engineering Manager",
+  metadata: {
+    "department": "engineering",
+    "badge_type": "contractor"
+  }
 )
 
 # Provision is an alias for issue (for backwards compatibility)
@@ -323,6 +333,77 @@ puts "Completed registration for org: #{result.name}"
 puts "Status: #{result.status}"
 ```
 
+### Landing Pages
+
+#### List landing pages
+
+```ruby
+landing_pages = client.console.list_landing_pages
+
+landing_pages.each do |page|
+  puts "ID: #{page.id}, Name: #{page.name}, Kind: #{page.kind}"
+  puts "  Password Protected: #{page.password_protected}"
+  puts "  Logo URL: #{page.logo_url}" if page.logo_url
+end
+```
+
+#### Create a landing page
+
+```ruby
+landing_page = client.console.create_landing_page(
+  name: "Miami Office Access Pass",
+  kind: "universal",
+  additional_text: "Welcome to the Miami Office",
+  bg_color: "#f1f5f9",
+  allow_immediate_download: true
+)
+
+puts "Landing page created: #{landing_page.id}"
+puts "Name: #{landing_page.name}, Kind: #{landing_page.kind}"
+```
+
+#### Update a landing page
+
+```ruby
+landing_page = client.console.update_landing_page(
+  landing_page_id: "0xlandingpage1d",
+  name: "Updated Miami Office Access Pass",
+  additional_text: "Welcome! Tap below to get your access pass.",
+  bg_color: "#e2e8f0"
+)
+
+puts "Landing page updated: #{landing_page.id}"
+puts "Name: #{landing_page.name}"
+```
+
+### Credential Profiles
+
+#### List credential profiles
+
+```ruby
+profiles = client.console.credential_profiles.list
+
+profiles.each do |profile|
+  puts "ID: #{profile.id}, Name: #{profile.name}, AID: #{profile.aid}"
+end
+```
+
+#### Create a credential profile
+
+```ruby
+profile = client.console.credential_profiles.create(
+  name: 'Main Office Profile',
+  app_name: 'KEY-ID-main',
+  keys: [
+    { value: 'your_32_char_hex_master_key_here' },
+    { value: 'your_32_char_hex__read_key__here' }
+  ]
+)
+
+puts "Profile created: #{profile.id}"
+puts "AID: #{profile.aid}"
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -402,6 +483,11 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |
 | POST /v1/console/webhooks | `console.webhooks.create()` | Y |
 | DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | Y |
+| GET /v1/console/landing-pages | `console.list_landing_pages()` | Y |
+| POST /v1/console/landing-pages | `console.create_landing_page()` | Y |
+| PUT /v1/console/landing-pages/{id} | `console.update_landing_page()` | Y |
+| GET /v1/console/credential-profiles | `console.credential_profiles.list()` | Y |
+| POST /v1/console/credential-profiles | `console.credential_profiles.create()` | Y |
 | POST /v1/console/hid/orgs | `console.hid.orgs.create()` | Y |
 | POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | Y |
 | GET /v1/console/hid/orgs | `console.hid.orgs.list()` | Y |
