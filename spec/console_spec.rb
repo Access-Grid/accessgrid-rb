@@ -327,7 +327,7 @@ RSpec.describe AccessGrid::Console do
   describe '#list_pass_template_pairs' do
     let(:pairs_response) do
       {
-        pass_template_pairs: [
+        card_template_pairs: [
           {
             id: 'pair_1',
             name: 'Employee Badge Pair',
@@ -353,18 +353,18 @@ RSpec.describe AccessGrid::Console do
     it 'returns pass template pairs' do
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: pairs_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
 
       expect(response).to be_a(Hash)
-      expect(response['pass_template_pairs']).to be_an(Array)
-      expect(response['pass_template_pairs'].length).to eq(2)
+      expect(response['card_template_pairs']).to be_an(Array)
+      expect(response['card_template_pairs'].length).to eq(2)
 
-      first_pair = response['pass_template_pairs'].first
+      first_pair = response['card_template_pairs'].first
       expect(first_pair).to be_a(AccessGrid::PassTemplatePair)
       expect(first_pair.id).to eq('pair_1')
       expect(first_pair.ios_template).to be_a(AccessGrid::TemplateInfo)
@@ -372,48 +372,48 @@ RSpec.describe AccessGrid::Console do
     end
 
     it 'accepts pagination params' do
-      query = { page: 2, per_page: 10 }.merge(generate_sig_payload(id: :'pass-template-pairs'))
+      query = { page: 2, per_page: 10 }.merge(generate_sig_payload(id: :'card-template-pairs'))
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: pairs_response,
         query: query
       )
 
       response = console.list_pass_template_pairs(page: 2, per_page: 10)
 
-      expect(response['pass_template_pairs']).to be_an(Array)
+      expect(response['card_template_pairs']).to be_an(Array)
     end
 
     it 'handles empty response' do
-      empty_response = { pass_template_pairs: [], pagination: { current_page: 1, total_pages: 0 } }
+      empty_response = { card_template_pairs: [], pagination: { current_page: 1, total_pages: 0 } }
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: empty_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
 
-      expect(response['pass_template_pairs']).to eq([])
+      expect(response['card_template_pairs']).to eq([])
     end
 
-    it 'handles nil pass_template_pairs in response' do
-      nil_response = { pass_template_pairs: nil }
+    it 'handles nil card_template_pairs in response' do
+      nil_response = { card_template_pairs: nil }
 
       stub_api_request(
         :get,
-        '/v1/console/pass-template-pairs',
+        '/v1/console/card-template-pairs',
         body: nil_response,
-        query: generate_sig_payload(id: :'pass-template-pairs')
+        query: generate_sig_payload(id: :'card-template-pairs')
       )
 
       response = console.list_pass_template_pairs
 
-      expect(response['pass_template_pairs']).to be_nil
+      expect(response['card_template_pairs']).to be_nil
     end
   end
 

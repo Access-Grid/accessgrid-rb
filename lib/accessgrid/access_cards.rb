@@ -55,8 +55,7 @@ module AccessGrid
     def manage_state(card_id, action)
       response = @client.make_request(
         :post,
-        "/v1/key-cards/#{card_id}/#{action}",
-        {}
+        "/v1/key-cards/#{card_id}/#{action}"
       )
       Card.new(response)
     end

@@ -47,13 +47,18 @@ module AccessGrid
     end
 
     def list_pass_template_pairs(params = {})
-      response = @client.make_request(:get, '/v1/console/pass-template-pairs', nil, params)
+      response = @client.make_request(:get, '/v1/console/card-template-pairs', nil, params)
 
-      if response['pass_template_pairs']
-        response['pass_template_pairs'] = response['pass_template_pairs'].map { |pair| PassTemplatePair.new(pair) }
+      if response['card_template_pairs']
+        response['card_template_pairs'] = response['card_template_pairs'].map { |pair| PassTemplatePair.new(pair) }
       end
 
       response
+    end
+
+    def create_pass_template_pair(params)
+      response = @client.make_request(:post, '/v1/console/card-template-pairs', params)
+      PassTemplatePair.new(response)
     end
 
     def list_ledger_items(params = {})

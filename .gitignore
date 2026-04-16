@@ -49,3 +49,6 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Test scripts
+scripts/

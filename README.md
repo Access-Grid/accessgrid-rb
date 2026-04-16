@@ -216,7 +216,7 @@ events = client.console.event_log(
 ```ruby
 response = client.console.list_pass_template_pairs(page: 1, per_page: 20)
 
-response['pass_template_pairs'].each do |pair|
+response['card_template_pairs'].each do |pair|
   puts "#{pair.name} (#{pair.id})"
   puts "  iOS: #{pair.ios_template&.name}"
   puts "  Android: #{pair.android_template&.name}"
@@ -477,7 +477,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | PUT /v1/console/card-templates/{id} | `console.update_template()` | Y |
 | GET /v1/console/card-templates/{id} | `console.read_template()` | Y |
 | GET /v1/console/card-templates/{id}/logs | `console.get_logs()` / `console.event_log()` | Y |
-| GET /v1/console/pass-template-pairs | `console.list_pass_template_pairs()` | Y |
+| GET /v1/console/card-template-pairs | `console.list_pass_template_pairs()` | Y |
+| POST /v1/console/card-template-pairs | `console.create_pass_template_pair()` | Y |
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |
