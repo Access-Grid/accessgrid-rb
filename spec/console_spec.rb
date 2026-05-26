@@ -11,7 +11,7 @@ RSpec.describe AccessGrid::Console do
       {
         name: 'Employee Badge',
         platform: 'apple',
-        use_case: 'employee_badge',
+        use_case: 'corporate_id',
         protocol: 'desfire',
         watch_count: 2,
         iphone_count: 3,
@@ -34,7 +34,7 @@ RSpec.describe AccessGrid::Console do
       {
         name: 'Employee Badge',
         platform: 'apple',
-        use_case: 'employee_badge',
+        use_case: 'corporate_id',
         protocol: 'desfire',
         watch_count: 2,
         iphone_count: 3,
@@ -159,7 +159,7 @@ RSpec.describe AccessGrid::Console do
         name: 'Employee Badge',
         platform: 'apple',
         protocol: 'desfire',
-        use_case: 'employee_badge',
+        use_case: 'corporate_id',
         created_at: '2025-01-01T00:00:00Z',
         issued_keys_count: 100,
         active_keys_count: 95
@@ -441,7 +441,7 @@ RSpec.describe AccessGrid::Console do
                 name: 'Employee Badge',
                 protocol: 'desfire',
                 platform: 'apple',
-                use_case: 'employee_badge'
+                use_case: 'corporate_id'
               }
             }
           },
@@ -502,7 +502,7 @@ RSpec.describe AccessGrid::Console do
       expect(pt.name).to eq('Employee Badge')
       expect(pt.protocol).to eq('desfire')
       expect(pt.platform).to eq('apple')
-      expect(pt.use_case).to eq('employee_badge')
+      expect(pt.use_case).to eq('corporate_id')
 
       expect(response['pagination']).to eq({
                                              'current_page' => 1,

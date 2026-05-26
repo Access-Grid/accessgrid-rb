@@ -139,7 +139,7 @@ client.access_cards.delete("0xc4rd1d")
 template = client.console.create_template(
   name: "Employee Access Pass",
   platform: "apple",
-  use_case: "employee_badge",
+  use_case: "corporate_id",
   protocol: "desfire",
   allow_on_multiple_devices: true,
   watch_count: 2,
