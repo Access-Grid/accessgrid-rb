@@ -628,6 +628,92 @@ RSpec.describe AccessGrid::Console do
     end
   end
 
+  describe '#publish_template' do
+    it 'POSTs to the publish endpoint and returns id + status' do
+      stub_api_request(
+        :post,
+        '/v1/console/card-templates/tmpl_123/publish',
+        body: { id: 'tmpl_123', status: 'in-review' },
+        query: generate_sig_payload(id: 'tmpl_123')
+      )
+
+      result = console.publish_template('tmpl_123')
+
+      expect(result).to be_a(AccessGrid::PublishTemplateResponse)
+      expect(result.id).to eq('tmpl_123')
+      expect(result.status).to eq('in-review')
+    end
+
+    it 'returns status "ready" for Android templates' do
+      stub_api_request(
+        :post,
+        '/v1/console/card-templates/tmpl_456/publish',
+        body: { id: 'tmpl_456', status: 'ready' },
+        query: generate_sig_payload(id: 'tmpl_456')
+      )
+
+      expect(console.publish_template('tmpl_456').status).to eq('ready')
+    end
+  end
+
+  describe '#reveal_smart_tap' do
+    # Captured wire-compat fixture — same caller keypair + envelope used in
+    # Elixir / PHP / Java specs. The caller_private_key is ephemeral and
+    # single-use by design (server rejects reuse on pubkey fingerprint), so
+    # committing it carries no credential risk.
+    let(:fixture_caller_private_key_pem) do
+      <<~PEM
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIIou+Kk08kWAjhi0WyIx+L2GrgStGBCPODlwKYKd5BydoAoGCCqGSM49
+        AwEHoUQDQgAE+gnDxXJt1SBaCK8roKH8QvOa/ItdQUe85JIsUc6RvhD/udLaFtHY
+        m+MnOmeSdVaKTPWudH0+iGbleB3kS7lYxQ==
+        -----END EC PRIVATE KEY-----
+      PEM
+    end
+
+    let(:fixture_envelope) do
+      {
+        'alg' => 'ECDH-ES+A256GCM',
+        'ciphertext' => 'ckYyA3FdRYjOFI/FKz/QeR5Yf9nZZFzo73kDXKZSB/EgbQ==',
+        'ephemeral_public_key' =>
+          "-----BEGIN PUBLIC KEY-----\n" \
+          "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7mg6i99GcIVutMPr/PXSBSQVlbLM\n" \
+          "tnJO10ZBjk9ZTfw6wwAVNBnDBiqY7VrdOG1JdFOYoac+NkAlyMRGYk2tVQ==\n" \
+          "-----END PUBLIC KEY-----\n",
+        'iv' => '5X2OCht+kLB/xQmX',
+        'tag' => '0vwkjVaCwi5zl37xvJPxeg=='
+      }
+    end
+
+    let(:fixture_priv) { OpenSSL::PKey::EC.new(fixture_caller_private_key_pem) }
+    let(:fixture_pub_pem) { fixture_priv.public_to_pem }
+
+    it 'returns the decrypted SmartTap PEM' do
+      allow(AccessGrid::SmartTapRevealCrypto).to receive(:generate_keypair).and_return(
+        priv: fixture_priv, pub_pem: fixture_pub_pem
+      )
+
+      stub_api_request(
+        :post,
+        '/v1/console/card-templates/tmpl-42/smart-tap/reveal',
+        body: {
+          key_version: 'tmpl-42',
+          collector_id: '12345678',
+          fingerprint: 'sha256:deadbeef',
+          encrypted_private_key: fixture_envelope
+        }
+      )
+
+      result = console.reveal_smart_tap('tmpl-42')
+
+      expect(result).to be_a(AccessGrid::RevealTemplatePrivateKey)
+      expect(result.key_version).to eq('tmpl-42')
+      expect(result.collector_id).to eq('12345678')
+      expect(result.fingerprint).to eq('sha256:deadbeef')
+      expect(result.private_key).to eq('FIXTURE-PLAINTEXT-NOT-A-CREDENTIAL')
+    end
+  end
+
   describe '#ios_preflight' do
     let(:preflight_response) do
       {

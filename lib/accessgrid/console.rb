@@ -73,6 +73,29 @@ module AccessGrid
 
     alias ledger_items list_ledger_items
 
+    def publish_template(template_id)
+      response = @client.make_request(:post, "/v1/console/card-templates/#{template_id}/publish")
+      PublishTemplateResponse.new(response)
+    end
+
+    # Reveal the SmartTap private key for a card template, decrypted client-side.
+    #
+    # The SDK generates a fresh ephemeral P-256 keypair per call, submits the
+    # public half, and decrypts the server's response. The returned
+    # RevealTemplatePrivateKey carries the plaintext PEM in #private_key;
+    # the encrypted envelope is consumed internally and not exposed.
+    def reveal_smart_tap(template_id)
+      keypair = SmartTapRevealCrypto.generate_keypair
+      response = @client.make_request(
+        :post,
+        "/v1/console/card-templates/#{template_id}/smart-tap/reveal",
+        { client_public_key: keypair[:pub_pem] }
+      )
+
+      plaintext = SmartTapRevealCrypto.decrypt_envelope(response['encrypted_private_key'], keypair[:priv])
+      RevealTemplatePrivateKey.new(response.merge('private_key' => plaintext))
+    end
+
     def ios_preflight(card_template_id:, access_pass_ex_id:)
       data = { access_pass_ex_id: access_pass_ex_id }
       response = @client.make_request(:post, "/v1/console/card-templates/#{card_template_id}/ios_preflight", data)
@@ -185,6 +208,30 @@ module AccessGrid
       @sharing_instance_identifier = data['sharingInstanceIdentifier']
       @card_template_identifier = data['cardTemplateIdentifier']
       @environment_identifier = data['environmentIdentifier']
+    end
+  end
+
+  # Result of publishing a card template.
+  class PublishTemplateResponse
+    attr_reader :id, :status
+
+    def initialize(data)
+      @id = data['id']
+      @status = data['status']
+    end
+  end
+
+  # Result of revealing a SmartTap private key. #private_key is the plaintext
+  # PEM, decrypted client-side by the SDK; the encrypted envelope is consumed
+  # internally and not exposed.
+  class RevealTemplatePrivateKey
+    attr_reader :key_version, :collector_id, :fingerprint, :private_key
+
+    def initialize(data)
+      @key_version = data['key_version']
+      @collector_id = data['collector_id']
+      @fingerprint = data['fingerprint']
+      @private_key = data['private_key']
     end
   end
 
