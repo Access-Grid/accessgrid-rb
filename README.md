@@ -139,7 +139,7 @@ client.access_cards.delete("0xc4rd1d")
 template = client.console.create_template(
   name: "Employee Access Pass",
   platform: "apple",
-  use_case: "employee_badge",
+  use_case: "corporate_id",
   protocol: "desfire",
   allow_on_multiple_devices: true,
   watch_count: 2,
@@ -184,6 +184,30 @@ template = client.console.update_template(
 ```ruby
 template = client.console.read_template("0xd3adb00b5")
 ```
+
+#### Publish a template
+
+```ruby
+result = client.console.publish_template("0xd3adb00b5")
+
+puts result.id      # "0xd3adb00b5"
+puts result.status  # "in-review" (Apple), "ready" (Android), or "publishing" (already in flight)
+```
+
+#### Reveal a SmartTap private key
+
+Fetches the template's SmartTap private key, decrypted client-side. The SDK generates a fresh ephemeral P-256 keypair per call, submits the public half, and decrypts the server's response — you get the plaintext PEM back without touching any crypto.
+
+```ruby
+reveal = client.console.reveal_smart_tap("0xd3adb00b5")
+
+puts "Key version:  #{reveal.key_version}"
+puts "Collector ID: #{reveal.collector_id}"
+puts "Fingerprint:  #{reveal.fingerprint}"
+puts reveal.private_key  # PEM — store in your reader/collector key vault
+```
+
+The server enforces single-use on pubkey fingerprint and rate-limits to 1 per minute per account. The SDK uses a fresh keypair every call, so single-use is satisfied automatically. Errors raised by the crypto path (`AccessGrid::DecryptError`, `AccessGrid::InvalidEnvelopeError`) and the HTTP path (`AccessGrid::AuthenticationError`, `AccessGrid::ResourceNotFoundError`, etc.) all descend from `AccessGrid::Error`.
 
 #### Get event logs
 
@@ -480,6 +504,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | GET /v1/console/card-template-pairs | `console.list_pass_template_pairs()` | Y |
 | POST /v1/console/card-template-pairs | `console.create_pass_template_pair()` | Y |
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
+| POST /v1/console/card-templates/{id}/publish | `console.publish_template()` | Y |
+| POST /v1/console/card-templates/{id}/smart-tap/reveal | `console.reveal_smart_tap()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |
 | POST /v1/console/webhooks | `console.webhooks.create()` | Y |

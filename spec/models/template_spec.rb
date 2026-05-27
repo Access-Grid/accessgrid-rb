@@ -11,7 +11,7 @@ RSpec.describe AccessGrid::Template do
           'name' => 'Employee Badge',
           'platform' => 'apple',
           'protocol' => 'desfire',
-          'use_case' => 'employee_badge',
+          'use_case' => 'corporate_id',
           'created_at' => '2025-01-01T00:00:00Z',
           'last_published_at' => '2025-01-15T00:00:00Z',
           'issued_keys_count' => 150,
@@ -52,7 +52,7 @@ RSpec.describe AccessGrid::Template do
       end
 
       it 'sets use_case' do
-        expect(template.use_case).to eq('employee_badge')
+        expect(template.use_case).to eq('corporate_id')
       end
 
       it 'sets created_at' do

@@ -11,6 +11,7 @@ require_relative 'accessgrid/access_cards'
 require_relative 'accessgrid/console'
 require_relative 'accessgrid/error'
 require_relative 'accessgrid/request'
+require_relative 'accessgrid/smart_tap_reveal_crypto'
 require_relative 'accessgrid/version'
 
 # Ruby SDK for the AccessGrid API.
