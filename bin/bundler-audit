@@ -4,5 +4,12 @@
 require 'bundler/setup'
 require 'bundler/audit/cli'
 
-ARGV.push('--config', '.bundler-audit.yml') if ARGV.empty? || ARGV.include?('check')
+# Refresh the local advisory DB before checking so `bin/ci` matches CI's
+# fresh-clone behavior. Without this, the local DB can lag the upstream by
+# months and we ship CVEs that CI catches.
+if ARGV.empty? || ARGV.include?('check')
+  Bundler::Audit::CLI.start(['update'])
+  ARGV.push('--config', '.bundler-audit.yml')
+end
+
 Bundler::Audit::CLI.start
