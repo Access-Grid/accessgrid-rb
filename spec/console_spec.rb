@@ -656,6 +656,48 @@ RSpec.describe AccessGrid::Console do
     end
   end
 
+  describe '#delete_template' do
+    it 'DELETEs the card template by id' do
+      stub_api_request(
+        :delete,
+        '/v1/console/card-templates/tmpl_123',
+        body: { id: 'tmpl_123', deactivated: true },
+        query: generate_sig_payload(id: :tmpl_123)
+      )
+
+      result = console.delete_template('tmpl_123')
+      expect(result).to eq('id' => 'tmpl_123', 'deactivated' => true)
+    end
+
+    it 'raises ValidationError on 422 when passes are still active' do
+      stub_api_request(
+        :delete,
+        '/v1/console/card-templates/tmpl_123',
+        status: 422,
+        body: {
+          status: 'error',
+          message: 'All access passes must be deleted before deactivating a card template',
+          active_pass_count: 3
+        },
+        query: generate_sig_payload(id: :tmpl_123)
+      )
+
+      expect { console.delete_template('tmpl_123') }.to raise_error(AccessGrid::ValidationError)
+    end
+
+    it 'raises ResourceNotFoundError on 404' do
+      stub_api_request(
+        :delete,
+        '/v1/console/card-templates/missing',
+        status: 404,
+        body: { status: 'error', message: 'Card template not found' },
+        query: generate_sig_payload(id: :missing)
+      )
+
+      expect { console.delete_template('missing') }.to raise_error(AccessGrid::ResourceNotFoundError)
+    end
+  end
+
   describe '#reveal_smart_tap' do
     # Captured wire-compat fixture — same caller keypair + envelope used in
     # Elixir / PHP / Java specs. The caller_private_key is ephemeral and
@@ -827,6 +869,38 @@ RSpec.describe AccessGrid::Console do
 
         result = webhooks_service.delete('wh_123')
         expect(result).to eq({})
+      end
+    end
+
+    describe '#verify' do
+      it 'POSTs to the verify endpoint and returns verified: true when already verified' do
+        stub_api_request(
+          :post,
+          '/v1/console/webhooks/wh_123/verify',
+          body: { id: 'wh_123', verified: true },
+          query: generate_sig_payload(id: 'wh_123')
+        )
+
+        result = webhooks_service.verify('wh_123')
+
+        expect(result).to be_a(AccessGrid::WebhookVerification)
+        expect(result.id).to eq('wh_123')
+        expect(result.verified).to be(true)
+      end
+
+      it 'returns verified: false when the handshake is (re)initiated (202)' do
+        stub_api_request(
+          :post,
+          '/v1/console/webhooks/wh_123/verify',
+          status: 202,
+          body: { id: 'wh_123', verified: false },
+          query: generate_sig_payload(id: 'wh_123')
+        )
+
+        result = webhooks_service.verify('wh_123')
+
+        expect(result).to be_a(AccessGrid::WebhookVerification)
+        expect(result.verified).to be(false)
       end
     end
   end
@@ -1052,6 +1126,49 @@ RSpec.describe AccessGrid::Console do
 
         profiles = profiles_service.list
         expect(profiles).to eq([])
+      end
+    end
+
+    describe '#delete' do
+      it 'DELETEs the credential profile by id' do
+        stub_api_request(
+          :delete,
+          '/v1/console/credential-profiles/cp_123',
+          body: { id: 'cp_123', deactivated: true },
+          query: generate_sig_payload(id: :cp_123)
+        )
+
+        result = profiles_service.delete('cp_123')
+        expect(result).to eq('id' => 'cp_123', 'deactivated' => true)
+      end
+
+      it 'raises ValidationError on 422 when the profile is still in use' do
+        stub_api_request(
+          :delete,
+          '/v1/console/credential-profiles/cp_123',
+          status: 422,
+          body: {
+            status: 'error',
+            message: ['1 active pass template(s) still point to this credential profile. Deactivate them first.'],
+            active_pass_template_count: 1,
+            active_pass_count: 0
+          },
+          query: generate_sig_payload(id: :cp_123)
+        )
+
+        expect { profiles_service.delete('cp_123') }.to raise_error(AccessGrid::ValidationError)
+      end
+
+      it 'raises ResourceNotFoundError on 404' do
+        stub_api_request(
+          :delete,
+          '/v1/console/credential-profiles/missing',
+          status: 404,
+          body: { status: 'error', message: 'Credential profile not found' },
+          query: generate_sig_payload(id: :missing)
+        )
+
+        expect { profiles_service.delete('missing') }.to raise_error(AccessGrid::ResourceNotFoundError)
       end
     end
   end

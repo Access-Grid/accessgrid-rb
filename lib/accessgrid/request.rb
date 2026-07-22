@@ -82,7 +82,8 @@ module AccessGrid
 
       last_part = parts.last
       second_to_last_part = parts[-2]
-      @resource_id = %w[suspend resume unlink delete publish].include?(last_part) ? second_to_last_part : last_part
+      action_words = %w[suspend resume unlink delete publish verify]
+      @resource_id = action_words.include?(last_part) ? second_to_last_part : last_part
     end
 
     def get?

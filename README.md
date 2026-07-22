@@ -194,6 +194,12 @@ puts result.id      # "0xd3adb00b5"
 puts result.status  # "in-review" (Apple), "ready" (Android), or "publishing" (already in flight)
 ```
 
+#### Delete a template
+
+```ruby
+client.console.delete_template("0xd3adb00b5")
+```
+
 #### Reveal a SmartTap private key
 
 Fetches the template's SmartTap private key, decrypted client-side. The SDK generates a fresh ephemeral P-256 keypair per call, submits the public half, and decrypts the server's response — you get the plaintext PEM back without touching any crypto.
@@ -318,6 +324,14 @@ end
 client.console.webhooks.delete('abc123')
 ```
 
+#### Verify a webhook
+
+```ruby
+result = client.console.webhooks.verify('abc123')
+
+puts "Verified: #{result.verified}"
+```
+
 ### HID Organizations
 
 #### Create an HID org
@@ -428,6 +442,12 @@ puts "Profile created: #{profile.id}"
 puts "AID: #{profile.aid}"
 ```
 
+#### Delete a credential profile
+
+```ruby
+client.console.credential_profiles.delete('a1b2c3d4e5f')
+```
+
 ## Configuration
 
 The SDK can be configured with a custom API endpoint:
@@ -506,15 +526,18 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/access
 | POST /v1/console/card-templates/{id}/ios_preflight | `console.ios_preflight()` | Y |
 | POST /v1/console/card-templates/{id}/publish | `console.publish_template()` | Y |
 | POST /v1/console/card-templates/{id}/smart-tap/reveal | `console.reveal_smart_tap()` | Y |
+| DELETE /v1/console/card-templates/{id} | `console.delete_template()` | Y |
 | GET /v1/console/ledger-items | `console.list_ledger_items()` / `console.ledger_items()` | Y |
 | GET /v1/console/webhooks | `console.webhooks.list()` | Y |
 | POST /v1/console/webhooks | `console.webhooks.create()` | Y |
 | DELETE /v1/console/webhooks/{id} | `console.webhooks.delete()` | Y |
+| POST /v1/console/webhooks/{id}/verify | `console.webhooks.verify()` | Y |
 | GET /v1/console/landing-pages | `console.list_landing_pages()` | Y |
 | POST /v1/console/landing-pages | `console.create_landing_page()` | Y |
 | PUT /v1/console/landing-pages/{id} | `console.update_landing_page()` | Y |
 | GET /v1/console/credential-profiles | `console.credential_profiles.list()` | Y |
 | POST /v1/console/credential-profiles | `console.credential_profiles.create()` | Y |
+| DELETE /v1/console/credential-profiles/{id} | `console.credential_profiles.delete()` | Y |
 | POST /v1/console/hid/orgs | `console.hid.orgs.create()` | Y |
 | POST /v1/console/hid/orgs/activate | `console.hid.orgs.activate()` | Y |
 | GET /v1/console/hid/orgs | `console.hid.orgs.list()` | Y |
