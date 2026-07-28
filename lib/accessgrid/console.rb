@@ -78,6 +78,10 @@ module AccessGrid
       PublishTemplateResponse.new(response)
     end
 
+    def delete_template(template_id)
+      @client.make_request(:delete, "/v1/console/card-templates/#{template_id}")
+    end
+
     # Reveal the SmartTap private key for a card template, decrypted client-side.
     #
     # The SDK generates a fresh ephemeral P-256 keypair per call, submits the
@@ -322,6 +326,10 @@ module AccessGrid
       profiles = response.is_a?(Array) ? response : response.fetch('credential_profiles', [])
       profiles.map { |profile| CredentialProfile.new(profile) }
     end
+
+    def delete(credential_profile_id)
+      @client.make_request(:delete, "/v1/console/credential-profiles/#{credential_profile_id}")
+    end
   end
 
   # Manages webhook operations.
@@ -348,6 +356,20 @@ module AccessGrid
 
     def delete(webhook_id)
       @client.make_request(:delete, "/v1/console/webhooks/#{webhook_id}")
+    end
+
+    def verify(webhook_id)
+      response = @client.make_request(:post, "/v1/console/webhooks/#{webhook_id}/verify")
+      WebhookVerification.new(response)
+    end
+  end
+
+  class WebhookVerification
+    attr_reader :id, :verified
+
+    def initialize(data)
+      @id = data['id']
+      @verified = data['verified']
     end
   end
 
